@@ -99,10 +99,11 @@ public sealed class EndpointSecurityImporter
         // Try exact id match first.
         foreach (var t in templates)
         {
-            if (t?["id"]?.GetValue<string>() == requested)
+            if (t is not JsonObject tObj) continue;
+            if (tObj["id"]?.GetValue<string>() == requested)
             {
-                var ttype = t["templateType"]?.GetValue<string>() ?? "";
-                var deprecated = t["isDeprecated"]?.GetValue<bool>() ?? false;
+                var ttype = tObj["templateType"]?.GetValue<string>() ?? "";
+                var deprecated = tObj["isDeprecated"]?.GetValue<bool>() ?? false;
                 if (ttype.Contains("microsoftEdgeSecurityBaseline", StringComparison.OrdinalIgnoreCase)
                     || ttype.Contains("securityBaseline", StringComparison.OrdinalIgnoreCase)
                     || ttype.Contains("advancedThreatProtectionSecurityBaseline", StringComparison.OrdinalIgnoreCase))
@@ -114,8 +115,8 @@ public sealed class EndpointSecurityImporter
                     // PS behaviour: pick a non-deprecated template that matches the policy display name.
                     var name = policy["displayName"]?.GetValue<string>();
                     foreach (var t2 in templates)
-                        if (t2?["displayName"]?.GetValue<string>() == name)
-                            return t2["id"]?.GetValue<string>();
+                        if (t2 is JsonObject t2Obj && t2Obj["displayName"]?.GetValue<string>() == name)
+                            return t2Obj["id"]?.GetValue<string>();
                 }
                 return requested;
             }
@@ -125,8 +126,8 @@ public sealed class EndpointSecurityImporter
         if (!string.IsNullOrEmpty(requestedName))
         {
             foreach (var t in templates)
-                if (t?["displayName"]?.GetValue<string>() == requestedName)
-                    return t["id"]?.GetValue<string>();
+                if (t is JsonObject tObj && tObj["displayName"]?.GetValue<string>() == requestedName)
+                    return tObj["id"]?.GetValue<string>();
         }
         return null;
     }

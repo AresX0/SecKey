@@ -49,10 +49,10 @@ public sealed class IntuneWinAppUtilRunner
         if (Directory.Exists(outputDir)) Directory.Delete(outputDir, true);
         Directory.CreateDirectory(outputDir);
 
-        var args = $"-q -c \"{sourcePath}\" -s \"{setupFile}\" -o \"{outputDir}\"";
-        _log.LogInformation("Running: {Tool} {Args}", IntuneWinAppUtilPath, args);
+        _log.LogInformation("Running: {Tool} -q -c {SourcePath} -s {SetupFile} -o {OutputDir}",
+            IntuneWinAppUtilPath, sourcePath, setupFile, outputDir);
 
-        var psi = new ProcessStartInfo(IntuneWinAppUtilPath, args)
+        var psi = new ProcessStartInfo(IntuneWinAppUtilPath)
         {
             CreateNoWindow = true,
             UseShellExecute = false,
@@ -60,6 +60,13 @@ public sealed class IntuneWinAppUtilRunner
             RedirectStandardError = true,
             RedirectStandardOutput = true
         };
+        psi.ArgumentList.Add("-q");
+        psi.ArgumentList.Add("-c");
+        psi.ArgumentList.Add(sourcePath);
+        psi.ArgumentList.Add("-s");
+        psi.ArgumentList.Add(setupFile);
+        psi.ArgumentList.Add("-o");
+        psi.ArgumentList.Add(outputDir);
         using var p = Process.Start(psi) ?? throw new InvalidOperationException("Failed to start IntuneWinAppUtil");
         await p.WaitForExitAsync(ct);
         if (p.ExitCode != 0)
