@@ -14,14 +14,14 @@ artifacts/
 *.nupkg
 packages/
 
-# PowerShell (exclude all scripts from upload)
-**/*.ps1
-**/*.psm1
-**/*.psd1
-**/*.ps1xml
+# Legacy archived content only
+archive/
+archive/**
 
-# Legacy archived content
-../archive/
+# Allow project PowerShell scripts (e.g., installer tooling)
+!installer/*.ps1
+!**/installer/*.ps1
+
 ../prepare/
 ../RemediationScripts/
 ../IntuneApps/
