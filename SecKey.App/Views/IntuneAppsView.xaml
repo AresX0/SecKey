@@ -1,0 +1,18 @@
+<UserControl x:Class="SecKey.App.Views.IntuneAppsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel Margin="24">
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,12">
+            <TextBlock Text="Intune Apps" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <Button Content="Refresh" Command="{Binding RefreshCommand}" Padding="14,6" Margin="16,0,0,0"/>
+            <TextBlock Text="{Binding StatusMessage}" Margin="16,0,0,0" VerticalAlignment="Center" Foreground="#6B7280"/>
+        </StackPanel>
+        <DataGrid ItemsSource="{Binding Items}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" Width="*"/>
+                <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="240"/>
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</UserControl>

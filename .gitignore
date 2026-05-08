@@ -1,0 +1,28 @@
+# Build outputs
+**/bin/
+**/obj/
+artifacts/
+
+# User/local files
+.vs/
+.vscode/
+*.user
+*.suo
+*.tmp
+
+# NuGet
+*.nupkg
+packages/
+
+# PowerShell (exclude all scripts from upload)
+**/*.ps1
+**/*.psm1
+**/*.psd1
+**/*.ps1xml
+
+# Legacy archived content
+../archive/
+../prepare/
+../RemediationScripts/
+../IntuneApps/
+../JSON/

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SecKey Project</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Enterprise Security Platform</p>
+      <h1>SecKey</h1>
+      <p class="lead">A modern .NET 10 platform for Intune, Entra ID, Conditional Access, Endpoint Security, and Win32 app lifecycle automation through Microsoft Graph.</p>
+      <div class="actions">
+        <a class="btn primary" href="../INSTALLATION.md">Installation Guide</a>
+        <a class="btn" href="../installer/README.txt">MSI Build Notes</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="grid">
+      <article class="card">
+        <h2>Core Capabilities</h2>
+        <ul>
+          <li>Device compliance, configuration, settings catalog, and enrollment profiles</li>
+          <li>Conditional Access and named locations management</li>
+          <li>Entra groups, users, app registration, and PIM scheduling operations</li>
+          <li>Win32 LOB packaging and staged Azure blob upload pipeline</li>
+          <li>WPF UI + CLI for operators and automation</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h2>Architecture</h2>
+        <ul>
+          <li>SecKey.Core: config, logging, JSON, utility layer</li>
+          <li>SecKey.Graph: Graph services, token provider, bulk importers</li>
+          <li>SecKey.App: WPF operational shell and workflows</li>
+          <li>SecKey.Cli: command-line automation entrypoint</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h2>Security Model</h2>
+        <ul>
+          <li>Delegated interactive/device-code sign-in</li>
+          <li>Application credentials for unattended operation</li>
+          <li>Scope-driven Graph permissions with admin consent support</li>
+          <li>Tenant-safe object existence checks before create/update</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="timeline">
+      <h2>Delivery Highlights</h2>
+      <div class="row"><span>01</span><p>Legacy PAWCSM scripts migrated and renamed to SecKey</p></div>
+      <div class="row"><span>02</span><p>Microsoft Graph service layer implemented for v1.0 and beta endpoints</p></div>
+      <div class="row"><span>03</span><p>WPF operations dashboard and CLI command surface delivered</p></div>
+      <div class="row"><span>04</span><p>MSI packaging workflow added using WiX CLI</p></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>SecKey project page • Enterprise endpoint and identity security automation</p>
+  </footer>
+</body>
+</html>

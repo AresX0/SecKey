@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="SecKey.App/SecKey.App.csproj" />
+  <Project Path="SecKey.Cli/SecKey.Cli.csproj" />
+  <Project Path="SecKey.Core/SecKey.Core.csproj" />
+  <Project Path="SecKey.Graph/SecKey.Graph.csproj" />
+</Solution>

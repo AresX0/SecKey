@@ -1,0 +1,25 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="SecKey"
+           Manufacturer="SecKey"
+           Version="1.0.0"
+           UpgradeCode="D47AF9AE-A53E-4D3A-B5A4-CFD744790213"
+           Language="1033"
+           Scope="perMachine">
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of SecKey is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="SecKey">
+        <Component Id="MainExe" Guid="*">
+          <File Id="SecKeyAppExe" Source="$(var.PublishDir)\SecKey.App.exe" KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <Feature Id="MainFeature" Title="SecKey" Level="1">
+      <ComponentRef Id="MainExe" />
+    </Feature>
+
+  </Package>
+</Wix>

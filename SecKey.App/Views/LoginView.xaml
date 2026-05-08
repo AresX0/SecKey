@@ -1,0 +1,30 @@
+<UserControl x:Class="SecKey.App.Views.LoginView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="B2V"/>
+    </UserControl.Resources>
+    <Grid Margin="32">
+        <StackPanel MaxWidth="500" HorizontalAlignment="Left">
+            <TextBlock Text="Sign in to Microsoft Graph" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,16"/>
+            <TextBlock Text="Tenant ID (or 'common'):"/>
+            <TextBox Text="{Binding TenantId, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,0,12"/>
+            <TextBlock Text="Client (Application) ID:"/>
+            <TextBox Text="{Binding ClientId, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,0,12"/>
+            <CheckBox Content="App-only (Client Credentials)" IsChecked="{Binding UseAppOnly}" Margin="0,4"/>
+            <CheckBox Content="Use Device Code flow (delegated)" IsChecked="{Binding UseDeviceCode}" Margin="0,4,0,12"/>
+            <TextBlock Text="Client Secret (only if app-only):"
+                       Visibility="{Binding UseAppOnly, Converter={StaticResource B2V}}"/>
+            <PasswordBox x:Name="SecretBox" Margin="0,4,0,12"
+                         Visibility="{Binding UseAppOnly, Converter={StaticResource B2V}}"
+                         PasswordChanged="SecretBox_PasswordChanged"/>
+            <StackPanel Orientation="Horizontal" Margin="0,8">
+                <Button Content="Sign in" Command="{Binding SignInCommand}" Padding="14,6" Margin="0,0,8,0"/>
+                <Button Content="Sign out" Command="{Binding SignOutCommand}" Padding="14,6"/>
+            </StackPanel>
+            <TextBlock Text="{Binding Status}" Foreground="#374151" TextWrapping="Wrap" Margin="0,8"/>
+            <ProgressBar IsIndeterminate="True" Height="4" Margin="0,8"
+                         Visibility="{Binding Busy, Converter={StaticResource B2V}}"/>
+        </StackPanel>
+    </Grid>
+</UserControl>
