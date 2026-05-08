@@ -1,11 +1,11 @@
 using System.Text.Json.Nodes;
 using SecKey.Core.Utilities;
 
-namespace SecKey.Graph.Services.AzureAD;
+namespace SecKey.Graph.Services.EntraID;
 
-public sealed class AADUserService : GraphServiceBase
+public sealed class EntraIdUserService : GraphServiceBase
 {
-    public AADUserService(GraphHttpClient c) : base(c) { }
+    public EntraIdUserService(GraphHttpClient c) : base(c) { }
     protected override string Resource => "users";
     protected override bool UseBeta => false;
 
@@ -41,9 +41,9 @@ public sealed class AADUserService : GraphServiceBase
     }
 }
 
-public sealed class AADGroupService : GraphServiceBase
+public sealed class EntraIdGroupService : GraphServiceBase
 {
-    public AADGroupService(GraphHttpClient c) : base(c) { }
+    public EntraIdGroupService(GraphHttpClient c) : base(c) { }
     protected override string Resource => "groups";
     protected override bool UseBeta => false;
 
@@ -133,9 +133,9 @@ public sealed class PimAssignmentService : GraphServiceBase
         => Client.PostAsync("roleManagement/directory/roleEligibilityScheduleRequests", body, false, ct);
 }
 
-public sealed class AzureAdDeviceService : GraphServiceBase
+public sealed class EntraIdDeviceService : GraphServiceBase
 {
-    public AzureAdDeviceService(GraphHttpClient c) : base(c) { }
+    public EntraIdDeviceService(GraphHttpClient c) : base(c) { }
     protected override string Resource => "devices";
     protected override bool UseBeta => false;
 

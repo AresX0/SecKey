@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Win32;
 using SecKey.App.Services;
 using SecKey.Graph;
-using SecKey.Graph.Services.AzureAD;
+using SecKey.Graph.Services.EntraID;
 using SecKey.Graph.Services.Intune;
 using SecKey.Graph.Services.Win32Lob;
 
@@ -58,7 +58,7 @@ public sealed partial class UploadAppViewModel : ObservableObject
             var packager = new IntuneWinAppUtilRunner(IntuneWinAppUtilPath, NullLogger<IntuneWinAppUtilRunner>.Instance);
             var uploader = new Win32LobUploader(graph, http, NullLogger<Win32LobUploader>.Instance);
             var apps = new IntuneApplicationService(graph);
-            var groups = new AADGroupService(graph);
+            var groups = new EntraIdGroupService(graph);
             var orchestrator = new IntuneAppOrchestrator(packager, uploader, apps, groups,
                 NullLogger<IntuneAppOrchestrator>.Instance);
 

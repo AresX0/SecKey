@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using SecKey.Graph.Auth;
 using SecKey.Graph.Services;
-using SecKey.Graph.Services.AzureAD;
+using SecKey.Graph.Services.EntraID;
 using SecKey.Graph.Services.Intune;
 using SecKey.Graph.Services.Win32Lob;
 
@@ -29,13 +29,13 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IntuneApplicationService>();
         services.AddSingleton<EndpointSecurityPolicyService>();
 
-        services.AddSingleton<AADUserService>();
-        services.AddSingleton<AADGroupService>();
+        services.AddSingleton<EntraIdUserService>();
+        services.AddSingleton<EntraIdGroupService>();
         services.AddSingleton<ConditionalAccessPolicyService>();
         services.AddSingleton<NamedLocationService>();
         services.AddSingleton<AppRegistrationService>();
         services.AddSingleton<PimAssignmentService>();
-        services.AddSingleton<AzureAdDeviceService>();
+        services.AddSingleton<EntraIdDeviceService>();
 
         services.AddSingleton<PolicyImporter>();
         services.AddSingleton<EndpointSecurityImporter>();

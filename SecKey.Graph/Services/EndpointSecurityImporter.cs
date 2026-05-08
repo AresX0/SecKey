@@ -1,7 +1,7 @@
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
 using SecKey.Core;
-using SecKey.Graph.Services.AzureAD;
+using SecKey.Graph.Services.EntraID;
 using SecKey.Graph.Services.Intune;
 
 namespace SecKey.Graph.Services;
@@ -13,12 +13,12 @@ namespace SecKey.Graph.Services;
 public sealed class EndpointSecurityImporter
 {
     private readonly EndpointSecurityPolicyService _policies;
-    private readonly AADGroupService _groups;
+    private readonly EntraIdGroupService _groups;
     private readonly ILogger<EndpointSecurityImporter> _log;
 
     public EndpointSecurityImporter(
         EndpointSecurityPolicyService policies,
-        AADGroupService groups,
+        EntraIdGroupService groups,
         ILogger<EndpointSecurityImporter> log)
     {
         _policies = policies;

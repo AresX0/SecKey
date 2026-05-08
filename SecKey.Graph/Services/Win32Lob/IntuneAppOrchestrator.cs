@@ -2,7 +2,7 @@ using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
 using SecKey.Core;
 using SecKey.Core.Configuration;
-using SecKey.Graph.Services.AzureAD;
+using SecKey.Graph.Services.EntraID;
 using SecKey.Graph.Services.Intune;
 
 namespace SecKey.Graph.Services.Win32Lob;
@@ -16,11 +16,11 @@ public sealed class IntuneAppOrchestrator
     private readonly IntuneWinAppUtilRunner _packager;
     private readonly Win32LobUploader _uploader;
     private readonly IntuneApplicationService _apps;
-    private readonly AADGroupService _groups;
+    private readonly EntraIdGroupService _groups;
     private readonly ILogger<IntuneAppOrchestrator> _log;
 
     public IntuneAppOrchestrator(IntuneWinAppUtilRunner packager, Win32LobUploader uploader,
-        IntuneApplicationService apps, AADGroupService groups, ILogger<IntuneAppOrchestrator> log)
+        IntuneApplicationService apps, EntraIdGroupService groups, ILogger<IntuneAppOrchestrator> log)
     {
         _packager = packager;
         _uploader = uploader;

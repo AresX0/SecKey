@@ -1,5 +1,5 @@
 using SecKey.App.Services;
-using SecKey.Graph.Services.AzureAD;
+using SecKey.Graph.Services.EntraID;
 using SecKey.Graph.Services.Intune;
 
 namespace SecKey.App.ViewModels;
@@ -14,7 +14,7 @@ public sealed class DashboardViewModel : GraphPageViewModel
         yield return new(null, "Compliance", (await new DeviceCompliancePolicyService(c).ListAsync()).Count + " items");
         yield return new(null, "Configuration", (await new DeviceConfigurationService(c).ListAsync()).Count + " items");
         yield return new(null, "Settings Catalog", (await new DeviceSettingsCatalogService(c).ListAsync()).Count + " items");
-        yield return new(null, "Groups", (await new AADGroupService(c).ListAsync()).Count + " items");
+        yield return new(null, "Groups", (await new EntraIdGroupService(c).ListAsync()).Count + " items");
         yield return new(null, "Conditional Access", (await new ConditionalAccessPolicyService(c).ListAsync()).Count + " items");
     }
 }
@@ -45,7 +45,7 @@ public sealed class GroupsViewModel : GraphPageViewModel
 {
     public GroupsViewModel(AuthState auth, IServiceProvider sp) : base(auth, sp) { }
     protected override IAsyncEnumerable<EntityRow> LoadAsync()
-        => GraphPageHelpers.ListAsRowsAsync(new AADGroupService(BuildClient()));
+        => GraphPageHelpers.ListAsRowsAsync(new EntraIdGroupService(BuildClient()));
 }
 
 public sealed class ConditionalAccessViewModel : GraphPageViewModel

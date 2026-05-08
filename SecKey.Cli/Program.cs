@@ -5,7 +5,7 @@ using SecKey.Core;
 using SecKey.Graph;
 using SecKey.Graph.Auth;
 using SecKey.Graph.Services;
-using SecKey.Graph.Services.AzureAD;
+using SecKey.Graph.Services.EntraID;
 using SecKey.Graph.Services.Intune;
 using SecKey.Graph.Services.Win32Lob;
 
@@ -55,7 +55,7 @@ try
             await ListAsync(sp.GetRequiredService<IntuneApplicationService>());
             break;
         case "list-groups":
-            await ListAsync(sp.GetRequiredService<AADGroupService>());
+            await ListAsync(sp.GetRequiredService<EntraIdGroupService>());
             break;
         case "list-compliance":
             await ListAsync(sp.GetRequiredService<DeviceCompliancePolicyService>());

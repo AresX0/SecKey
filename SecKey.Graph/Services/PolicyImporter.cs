@@ -1,7 +1,7 @@
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
 using SecKey.Core;
-using SecKey.Graph.Services.AzureAD;
+using SecKey.Graph.Services.EntraID;
 using SecKey.Graph.Services.Intune;
 
 namespace SecKey.Graph.Services;
@@ -9,7 +9,7 @@ namespace SecKey.Graph.Services;
 /// <summary>
 /// Bulk JSON-list importers (analogs of Import-DeviceCompliancePolicyList, Import-DeviceConfigurationList,
 /// Import-DeviceSettingsCatalog, Import-AutoPilotPolicyList, Import-EnrollmentStatusPageList,
-/// Import-NamedLocationList, Import-ConditionalAccessPolicyList, Import-AADGroupList, Import-AADUserList,
+/// Import-NamedLocationList, Import-ConditionalAccessPolicyList, Import-EntraIdGroupList, Import-EntraIdUserList,
 /// Import-IntuneRoleScopeTagList, Import-EndpointSecurityPolicyList).
 /// </summary>
 public sealed class PolicyImporter
