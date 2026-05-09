@@ -4,12 +4,12 @@
            Version="1.0.0"
            UpgradeCode="D47AF9AE-A53E-4D3A-B5A4-CFD744790213"
            Language="1033"
-           Scope="perMachine">
+           Scope="perUser">
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of SecKey is already installed." />
     <MediaTemplate EmbedCab="yes" />
 
-    <StandardDirectory Id="ProgramFiles64Folder">
+    <StandardDirectory Id="LocalAppDataFolder">
       <Directory Id="INSTALLFOLDER" Name="SecKey">
         <Component Id="MainExe" Guid="*">
           <File Id="SecKeyAppExe" Source="$(var.PublishDir)\SecKey.App.exe" KeyPath="yes" />
