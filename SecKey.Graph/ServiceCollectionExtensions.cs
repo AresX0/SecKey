@@ -33,6 +33,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<EntraIdGroupService>();
         services.AddSingleton<ConditionalAccessPolicyService>();
         services.AddSingleton<NamedLocationService>();
+        services.AddSingleton<AuthenticationContextService>();
+        services.AddSingleton<AuthenticationStrengthService>();
         services.AddSingleton<AppRegistrationService>();
         services.AddSingleton<PimAssignmentService>();
         services.AddSingleton<EntraIdDeviceService>();

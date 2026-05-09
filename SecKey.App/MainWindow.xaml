@@ -3,40 +3,151 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SecKey.App"
         xmlns:vm="clr-namespace:SecKey.App.ViewModels"
         xmlns:v="clr-namespace:SecKey.App.Views"
         mc:Ignorable="d"
-        Title="SecKey - Intune Configuration Manager" Height="720" Width="1200" MinHeight="500" MinWidth="800">
+        Title="SecKey - Intune Configuration Manager" Height="760" Width="1280" MinHeight="560" MinWidth="980"
+        Icon="Assets/JosephThePlatypus.ico"
+        Background="#0B1220"
+        FontFamily="Segoe UI">
     <Window.Resources>
+        <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#111A2C"/>
+        <SolidColorBrush x:Key="SidebarButtonBrush" Color="#1B2740"/>
+        <SolidColorBrush x:Key="SidebarButtonHoverBrush" Color="#2A3B5F"/>
+        <SolidColorBrush x:Key="SidebarButtonPressedBrush" Color="#345084"/>
+        <SolidColorBrush x:Key="MainSurfaceBrush" Color="#F3F6FB"/>
+
+        <Style x:Key="NavButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource SidebarButtonBrush}"/>
+            <Setter Property="Foreground" Value="#F3F7FF"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="10">
+                            <ContentPresenter Margin="2,0,2,0" VerticalAlignment="Center" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource SidebarButtonHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource SidebarButtonPressedBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.55"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <DataTemplate DataType="{x:Type vm:LoginViewModel}"><v:LoginView/></DataTemplate>
         <DataTemplate DataType="{x:Type vm:DashboardViewModel}"><v:DashboardView/></DataTemplate>
         <DataTemplate DataType="{x:Type vm:IntuneAppsViewModel}"><v:IntuneAppsView/></DataTemplate>
         <DataTemplate DataType="{x:Type vm:PoliciesViewModel}"><v:PoliciesView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:InfrastructureViewModel}"><v:InfrastructureView/></DataTemplate>
         <DataTemplate DataType="{x:Type vm:GroupsViewModel}"><v:GroupsView/></DataTemplate>
         <DataTemplate DataType="{x:Type vm:ConditionalAccessViewModel}"><v:ConditionalAccessView/></DataTemplate>
         <DataTemplate DataType="{x:Type vm:UploadAppViewModel}"><v:UploadAppView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:DeviceTaggingViewModel}"><v:DeviceTaggingView/></DataTemplate>
     </Window.Resources>
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="220"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="#1F2937">
-            <StackPanel Margin="12">
-                <TextBlock Text="SecKey" Foreground="White" FontSize="24" FontWeight="Bold" Margin="4,8,4,16"/>
-                <TextBlock Text="{Binding AuthStatus}" Foreground="#9CA3AF" Margin="4,0,4,16" TextWrapping="Wrap"/>
-                <Button Content="Sign in / out"   Command="{Binding ShowLoginCommand}"      Margin="0,4" Padding="8" Background="#374151" Foreground="White" BorderThickness="0"/>
-                <Button Content="Dashboard"        Command="{Binding ShowDashboardCommand}"  Margin="0,4" Padding="8" Background="#374151" Foreground="White" BorderThickness="0"/>
-                <Button Content="Intune Apps"      Command="{Binding ShowAppsCommand}"       Margin="0,4" Padding="8" Background="#374151" Foreground="White" BorderThickness="0"/>
-                <Button Content="Upload App"       Command="{Binding ShowUploadCommand}"     Margin="0,4" Padding="8" Background="#374151" Foreground="White" BorderThickness="0"/>
-                <Button Content="Compliance / Config" Command="{Binding ShowPoliciesCommand}" Margin="0,4" Padding="8" Background="#374151" Foreground="White" BorderThickness="0"/>
-                <Button Content="Groups"           Command="{Binding ShowGroupsCommand}"     Margin="0,4" Padding="8" Background="#374151" Foreground="White" BorderThickness="0"/>
-                <Button Content="Conditional Access" Command="{Binding ShowCaCommand}"       Margin="0,4" Padding="8" Background="#374151" Foreground="White" BorderThickness="0"/>
-            </StackPanel>
+    <Grid Background="#0B1220">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Menu Bar -->
+        <Menu Grid.Row="0" Background="#101A2E" Foreground="#F3F7FF" FontSize="13">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Export Settings" Command="{Binding ExportSettingsCommand}"/>
+                <MenuItem Header="_Import Settings" Command="{Binding ImportSettingsCommand}"/>
+                <Separator/>
+                <MenuItem Header="E_xit" Command="{Binding ExitCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem Header="_Refresh" Command="{Binding RefreshCommand}" InputGestureText="F5"/>
+                <MenuItem Header="_Dark Mode" IsCheckable="True" IsChecked="True" Command="{Binding ToggleDarkModeCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_Open Help File" Command="{Binding OpenHelpCommand}"/>
+                <MenuItem Header="_Skip Reasons Reference" Command="{Binding OpenSkipReasonsCommand}"/>
+                <MenuItem Header="_About SecKey" Command="{Binding OpenAboutCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Settings">
+                <MenuItem Header="_Preferences" Command="{Binding OpenPreferencesCommand}"/>
+                <MenuItem Header="_View Logs" Command="{Binding OpenLogsCommand}"/>
+                <MenuItem Header="_Advanced Options" Command="{Binding OpenAdvancedCommand}"/>
+            </MenuItem>
+        </Menu>
+
+        <Grid Grid.Row="1" Background="#0B1220">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="{StaticResource SidebarBackgroundBrush}" Margin="16" CornerRadius="18">
+            <Grid Margin="16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0">
+                    <Image Source="Assets/PlatypusToolsLogo.png" Width="88" Height="88" Stretch="Uniform" HorizontalAlignment="Left" Margin="0,0,0,8"/>
+                    <TextBlock Text="SecKey" Foreground="#F8FAFF" FontSize="30" FontWeight="Bold"/>
+                    <TextBlock Text="Tenant security deployment" Foreground="#9FB2D5" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <Border Grid.Row="1" Margin="0,16,0,16" Background="#0E1628" CornerRadius="10" Padding="12">
+                    <StackPanel>
+                        <TextBlock Text="Current Auth" Foreground="#8EA2C8" FontSize="12"/>
+                        <TextBlock Text="{Binding AuthStatus}" Foreground="#E8F0FF" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Row="2">
+                    <Button Content="Sign In / Out" Command="{Binding ShowLoginCommand}" Style="{StaticResource NavButtonStyle}"/>
+                    <Button Content="Dashboard" Command="{Binding ShowDashboardCommand}" Style="{StaticResource NavButtonStyle}"/>
+                    <Button Content="Deploy/Remove Secure Keyboard infra" Command="{Binding ShowInfrastructureCommand}" Style="{StaticResource NavButtonStyle}"/>
+                    <Button Content="Intune Apps" Command="{Binding ShowAppsCommand}" Style="{StaticResource NavButtonStyle}"/>
+                    <Button Content="Upload App" Command="{Binding ShowUploadCommand}" Style="{StaticResource NavButtonStyle}"/>
+                    <Button Content="Compliance + Config" Command="{Binding ShowPoliciesCommand}" Style="{StaticResource NavButtonStyle}"/>
+                    <Button Content="Groups" Command="{Binding ShowGroupsCommand}" Style="{StaticResource NavButtonStyle}"/>
+                    <Button Content="Conditional Access" Command="{Binding ShowCaCommand}" Style="{StaticResource NavButtonStyle}"/>
+                    <Button Content="Device Tagging" Command="{Binding ShowDeviceTaggingCommand}" Style="{StaticResource NavButtonStyle}"/>
+                </StackPanel>
+
+                <TextBlock Grid.Row="3" Text="Tip: start with Sign In / Out and Validate Access before full deployment." Foreground="#8DA2C9" TextWrapping="Wrap" Margin="2,8,2,2"/>
+            </Grid>
         </Border>
 
-        <ContentControl Grid.Column="1" Content="{Binding CurrentView}" Margin="0"/>
+        <Grid Grid.Column="1" Margin="0,16,16,16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="#101A2E" CornerRadius="14" Padding="18" Margin="0,0,0,12">
+                <TextBlock Text="Configuration Workspace" FontSize="18" FontWeight="SemiBold" Foreground="#ECF3FF"/>
+            </Border>
+
+            <Border Grid.Row="1" Background="{StaticResource MainSurfaceBrush}" CornerRadius="16" Padding="0">
+                <ContentControl Content="{Binding CurrentView}" Margin="0"/>
+            </Border>
+        </Grid>
+        </Grid>
     </Grid>
 </Window>

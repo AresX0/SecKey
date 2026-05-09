@@ -82,8 +82,11 @@ public sealed class GraphHttpClient
         if (!resp.IsSuccessStatusCode)
         {
             _log.LogError("Graph {Method} {Url} -> {Status}: {Body}", method, url, (int)resp.StatusCode, text);
+            var detail = ExtractGraphErrorSummary(text);
             throw new SecKeyException(
-                $"Graph {method} {url} returned {(int)resp.StatusCode}",
+                string.IsNullOrWhiteSpace(detail)
+                    ? $"Graph {method} {url} returned {(int)resp.StatusCode}"
+                    : $"Graph {method} {url} returned {(int)resp.StatusCode}: {detail}",
                 requestUri: url,
                 responseBody: text,
                 statusCode: (int)resp.StatusCode);
@@ -114,6 +117,30 @@ public sealed class GraphHttpClient
                     if (item is not null) yield return item;
 
             url = node?["@odata.nextLink"]?.GetValue<string>() ?? "";
+        }
+    }
+
+    private static string? ExtractGraphErrorSummary(string? responseBody)
+    {
+        if (string.IsNullOrWhiteSpace(responseBody)) return null;
+        try
+        {
+            var root = JsonNode.Parse(responseBody);
+            var err = root?["error"];
+            if (err is null) return null;
+
+            var code = err["code"]?.GetValue<string>();
+            var message = err["message"]?.GetValue<string>();
+
+            if (!string.IsNullOrWhiteSpace(code) && !string.IsNullOrWhiteSpace(message))
+                return $"{code} - {message}";
+            if (!string.IsNullOrWhiteSpace(message))
+                return message;
+            return code;
+        }
+        catch
+        {
+            return null;
         }
     }
 }

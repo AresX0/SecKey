@@ -2,11 +2,36 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DockPanel Margin="24">
+        <Border DockPanel.Dock="Bottom" Margin="0,12,0,0" Padding="10,8" Background="#E8EEF9" BorderBrush="#C8D5EC" BorderThickness="1" CornerRadius="6">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Deployment Status:" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="{Binding DeploymentStatus}" Margin="10,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="#1F2937"/>
+            </Grid>
+        </Border>
+
+        <Expander DockPanel.Dock="Bottom" Margin="0,12,0,0" Header="Deployment History" IsExpanded="False">
+            <DataGrid ItemsSource="{Binding DeploymentHistory}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" MinHeight="120" MaxHeight="220">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Time" Binding="{Binding Timestamp}" Width="90"/>
+                    <DataGridTextColumn Header="Scope" Binding="{Binding Scope}" Width="180"/>
+                    <DataGridTextColumn Header="Stage" Binding="{Binding Stage}" Width="110"/>
+                    <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Expander>
+
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,12">
             <TextBlock Text="Entra ID Groups" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center"/>
             <Button Content="Refresh" Command="{Binding RefreshCommand}" Padding="14,6" Margin="16,0,0,0"/>
             <TextBlock Text="{Binding StatusMessage}" Margin="16,0,0,0" VerticalAlignment="Center" Foreground="#6B7280"/>
         </StackPanel>
+        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <Button Content="Deploy Users + Groups" Command="{Binding DeployGroupsCommand}" Padding="14,6" Margin="0,0,8,8"/>
+        </WrapPanel>
         <DataGrid ItemsSource="{Binding Items}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" Width="*"/>

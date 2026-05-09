@@ -21,7 +21,22 @@ public partial class App : Application
         services.AddLogging(b => b.AddDebug().SetMinimumLevel(LogLevel.Information));
 
         // Default auth options; the Login page replaces the registered ITokenProvider with a configured one.
-        var defaultOptions = new AuthOptions { Mode = AuthMode.Interactive, TenantId = "common" };
+        var defaultOptions = new AuthOptions
+        {
+            Mode = AuthMode.Interactive,
+            TenantId = "common",
+            Scopes = new[]
+            {
+                "https://graph.microsoft.com/Directory.ReadWrite.All",
+                "https://graph.microsoft.com/DeviceManagementApps.ReadWrite.All",
+                "https://graph.microsoft.com/DeviceManagementConfiguration.ReadWrite.All",
+                "https://graph.microsoft.com/DeviceManagementScripts.ReadWrite.All",
+                "https://graph.microsoft.com/DeviceManagementServiceConfig.ReadWrite.All",
+                "https://graph.microsoft.com/Group.ReadWrite.All",
+                "https://graph.microsoft.com/User.ReadWrite.All",
+                "https://graph.microsoft.com/Policy.ReadWrite.ConditionalAccess"
+            }
+        };
         services.AddSecKeyAuth(defaultOptions);
         services.AddSecKeyGraph();
 
@@ -30,10 +45,12 @@ public partial class App : Application
         services.AddTransient<LoginViewModel>();
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<IntuneAppsViewModel>();
+        services.AddTransient<InfrastructureViewModel>();
         services.AddTransient<PoliciesViewModel>();
         services.AddTransient<GroupsViewModel>();
         services.AddTransient<ConditionalAccessViewModel>();
         services.AddTransient<UploadAppViewModel>();
+        services.AddTransient<DeviceTaggingViewModel>();
 
         Services = services.BuildServiceProvider();
 

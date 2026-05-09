@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Text.Json.Nodes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SecKey.Core;
 using SecKey.App.Services;
 using SecKey.Graph;
 using SecKey.Graph.Services;
@@ -48,6 +49,10 @@ public abstract partial class GraphPageViewModel : ObservableObject
                 Items.Add(row);
             StatusMessage = $"{Items.Count} items";
         }
+        catch (SecKeyException ex) when (ex.StatusCode == 403)
+        {
+            StatusMessage = BuildForbiddenGuidance(ex);
+        }
         catch (Exception ex)
         {
             StatusMessage = $"Error: {ex.Message}";
@@ -56,6 +61,22 @@ public abstract partial class GraphPageViewModel : ObservableObject
     }
 
     protected abstract IAsyncEnumerable<EntityRow> LoadAsync();
+
+    private static string BuildForbiddenGuidance(SecKeyException ex)
+    {
+        var uri = ex.RequestUri ?? string.Empty;
+        if (uri.Contains("conditionalAccess", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Access denied (403) for Conditional Access. Required: Graph Policy.Read.All or Policy.ReadWrite.ConditionalAccess, and tenant role like Conditional Access Administrator/Security Administrator/Global Administrator.";
+        }
+
+        if (uri.Contains("/devices", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Access denied (403) for device operations. Required: Graph Device.ReadWrite.All or Directory.ReadWrite.All, with a role that can update devices (for example Intune Administrator or Global Administrator).";
+        }
+
+        return $"Access denied (403). {ex.Message}";
+    }
 }
 
 public sealed record EntityRow(string? Id, string? DisplayName, string? Description = null, string? ExtraJson = null);

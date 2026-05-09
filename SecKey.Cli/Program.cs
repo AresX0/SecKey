@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Nodes;
+using System.Text.Json.Nodes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SecKey.Core;
@@ -35,6 +35,7 @@ services.AddSecKeyAuth(new AuthOptions
             "https://graph.microsoft.com/Directory.ReadWrite.All",
             "https://graph.microsoft.com/DeviceManagementApps.ReadWrite.All",
             "https://graph.microsoft.com/DeviceManagementConfiguration.ReadWrite.All",
+            "https://graph.microsoft.com/DeviceManagementScripts.ReadWrite.All",
             "https://graph.microsoft.com/DeviceManagementServiceConfig.ReadWrite.All",
             "https://graph.microsoft.com/Group.ReadWrite.All",
             "https://graph.microsoft.com/User.ReadWrite.All",
@@ -66,6 +67,18 @@ try
         case "list-ca":
             await ListAsync(sp.GetRequiredService<ConditionalAccessPolicyService>());
             break;
+        case "list-windows-devices":
+        {
+            var devices = sp.GetRequiredService<EntraIdDeviceService>();
+            var arr = await devices.ListWindowsAsync();
+            foreach (var n in arr)
+            {
+                var name = n?["displayName"]?.GetValue<string>();
+                var id = n?["id"]?.GetValue<string>();
+                Console.WriteLine($"{id}  {name}");
+            }
+            break;
+        }
         case "import-app" when args.Length >= 2:
         {
             var orch = sp.GetRequiredService<IntuneAppOrchestrator>();
@@ -81,6 +94,65 @@ try
             var svc = sp.GetRequiredService<DeviceCompliancePolicyService>();
             var created = await importer.ImportFromDirectoryAsync(svc, args[1]);
             Console.WriteLine($"Created {created.Count} policies");
+            break;
+        }
+        case "import-security-baseline":
+        {
+            var graph = sp.GetRequiredService<GraphHttpClient>();
+            var baselinePath = args.Length >= 2
+                ? args[1]
+                : Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..", "Windows 11 v25H2 Security Baseline.zip"));
+            var repoRoot = ResolveRepoRoot(Environment.CurrentDirectory);
+
+            var importer = new SettingsImportService(graph);
+            var result = await importer.ImportSecurityBaselineAsync(baselinePath, repoRoot);
+            Console.WriteLine(result.ToStatusText());
+            foreach (var note in result.Notes) Console.WriteLine($"NOTE: {note}");
+            break;
+        }
+        case "deploy-csm":
+        {
+            var graph = sp.GetRequiredService<GraphHttpClient>();
+            var repoRoot = ResolveRepoRoot(Environment.CurrentDirectory);
+            var deployment = new SecKeyManifestDeploymentService(graph);
+            var options = new SecKeyManifestDeploymentOptions
+            {
+                AdditionalBreakGlassAccounts = args.Skip(1).Where(a => !string.IsNullOrWhiteSpace(a)).ToArray()
+            };
+            var result = await deployment.DeployCsmAsync(repoRoot, options);
+            Console.WriteLine(result.ToStatusText());
+            foreach (var note in result.Notes) Console.WriteLine($"NOTE: {note}");
+            break;
+        }
+        case "import-exported-settings" when args.Length >= 2:
+        {
+            var graph = sp.GetRequiredService<GraphHttpClient>();
+            var importer = new SettingsImportService(graph);
+            var result = await importer.ImportExportedSettingsAsync(args[1]);
+            Console.WriteLine(result.ToStatusText());
+            foreach (var note in result.Notes) Console.WriteLine($"NOTE: {note}");
+            break;
+        }
+        case "tag-device-seckey" when args.Length >= 2:
+        {
+            await SetDeviceExtensionAttributeAsync(sp, args[1], 1, "SECKEY");
+            break;
+        }
+        case "tag-device-paw" when args.Length >= 2:
+        {
+            Console.Error.WriteLine("DEPRECATED: 'tag-device-paw' is deprecated. Use 'tag-device-seckey' instead.");
+            await SetDeviceExtensionAttributeAsync(sp, args[1], 1, "SECKEY");
+            break;
+        }
+        case "set-device-ext" when args.Length >= 4:
+        {
+            if (!int.TryParse(args[2], out var number) || number < 1 || number > 15)
+            {
+                Console.Error.WriteLine("ERROR: <attributeNumber> must be an integer between 1 and 15.");
+                return 2;
+            }
+
+            await SetDeviceExtensionAttributeAsync(sp, args[1], number, args[3]);
             break;
         }
         default:
@@ -107,6 +179,21 @@ static async Task ListAsync(GraphServiceBase svc)
     }
 }
 
+static async Task SetDeviceExtensionAttributeAsync(IServiceProvider sp, string deviceName, int number, string value)
+{
+    var devices = sp.GetRequiredService<EntraIdDeviceService>();
+    var device = await devices.GetWindowsByDisplayNameAsync(deviceName);
+    if (device is null)
+        throw new SecKeyException($"No Windows device found with displayName '{deviceName}'.");
+
+    var id = device["id"]?.GetValue<string>();
+    if (string.IsNullOrWhiteSpace(id))
+        throw new SecKeyException($"Device '{deviceName}' did not return a valid id.");
+
+    await devices.SetExtensionAttributeAsync(id, number, value);
+    Console.WriteLine($"Updated {deviceName}: extensionAttribute{number} = {value}");
+}
+
 static void PrintUsage()
 {
     Console.WriteLine("SecKey CLI - usage:");
@@ -115,8 +202,28 @@ static void PrintUsage()
     Console.WriteLine("  list-compliance");
     Console.WriteLine("  list-config");
     Console.WriteLine("  list-ca");
+    Console.WriteLine("  list-windows-devices");
     Console.WriteLine("  import-app <appFolder>");
     Console.WriteLine("  import-policies <jsonDirectory>");
+    Console.WriteLine("  import-security-baseline [baselineZipPath]");
+    Console.WriteLine("  deploy-csm [breakGlassAccount1] [breakGlassAccount2] ...");
+    Console.WriteLine("  import-exported-settings <directoryOrZip>");
+    Console.WriteLine("  tag-device-seckey <deviceName>");
+    Console.WriteLine("  set-device-ext <deviceName> <attributeNumber 1-15> <value>");
     Console.WriteLine();
     Console.WriteLine("Auth: set SECKEY_TENANT, SECKEY_CLIENT, optional SECKEY_SECRET (app-only).");
+}
+
+static string ResolveRepoRoot(string startDirectory)
+{
+    var dir = new DirectoryInfo(startDirectory);
+    while (dir is not null)
+    {
+        if (Directory.Exists(Path.Combine(dir.FullName, "JSON")) &&
+            Directory.Exists(Path.Combine(dir.FullName, "source")))
+            return dir.FullName;
+        dir = dir.Parent;
+    }
+
+    return Path.GetFullPath(Path.Combine(startDirectory, ".."));
 }

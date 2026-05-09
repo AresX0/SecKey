@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace SecKey.Core.Configuration;
 
 /// <summary>
-/// Mirrors the IntuneApps/*/config.json schema (pawintuneapp.schema.json).
+/// Mirrors the IntuneApps/*/config.json schema (SECKEYintuneapp.schema.json).
 /// </summary>
 public sealed class IntuneAppConfig
 {

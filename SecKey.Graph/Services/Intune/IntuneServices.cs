@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using SecKey.Core;
 
 namespace SecKey.Graph.Services.Intune;
 
@@ -56,6 +57,12 @@ public sealed class DeviceSettingsCatalogService : GraphServiceBase
     }
 }
 
+public sealed class ReusablePolicySettingService : GraphServiceBase
+{
+    public ReusablePolicySettingService(GraphHttpClient c) : base(c) { }
+    protected override string Resource => "deviceManagement/reusablePolicySettings";
+}
+
 public sealed class EnrollmentStatusPageService : GraphServiceBase
 {
     public EnrollmentStatusPageService(GraphHttpClient c) : base(c) { }
@@ -85,10 +92,57 @@ public sealed class AutopilotProfileService : GraphServiceBase
     public AutopilotProfileService(GraphHttpClient c) : base(c) { }
     protected override string Resource => "deviceManagement/windowsAutopilotDeploymentProfiles";
 
-    public Task SetAssignmentsAsync(string id, JsonArray assignments, CancellationToken ct = default)
+    public async Task ClearAssignmentsAsync(string id, CancellationToken ct = default)
+    {
+        var assignmentsNode = await Client.GetAsync($"{Resource}/{id}/assignments", UseBeta, ct);
+        var assignments = assignmentsNode?["value"] as JsonArray;
+        if (assignments is null)
+            return;
+
+        foreach (var assignment in assignments.OfType<JsonObject>())
+        {
+            var assignmentId = assignment["id"]?.GetValue<string>();
+            if (string.IsNullOrWhiteSpace(assignmentId))
+                continue;
+
+            try
+            {
+                await Client.DeleteAsync($"{Resource}/{id}/assignments/{assignmentId}", UseBeta, ct);
+            }
+            catch (SecKeyException ex) when (ex.StatusCode == 404)
+            {
+                // Assignment was already removed.
+            }
+        }
+    }
+
+    public async Task SetAssignmentsAsync(string id, JsonArray assignments, CancellationToken ct = default)
     {
         var body = new JsonObject { ["assignments"] = assignments };
-        return Client.PostAsync($"{Resource}/{id}/assign", body, UseBeta, ct);
+
+        try
+        {
+            await Client.PostAsync($"{Resource}/{id}/assign", body, UseBeta, ct);
+            return;
+        }
+        catch (SecKeyException ex) when (ex.StatusCode == 403 || ex.StatusCode == 404)
+        {
+            // Some tenants reject the /assign action (FeatureNotEnabled). Fall back to
+            // creating assignment rows directly via /assignments.
+        }
+
+        foreach (var assignment in assignments.OfType<JsonObject>())
+        {
+            var target = assignment["target"]?.DeepClone();
+            if (target is null) continue;
+
+            var assignmentBody = new JsonObject
+            {
+                ["target"] = target
+            };
+
+            await Client.PostAsync($"{Resource}/{id}/assignments", assignmentBody, UseBeta, ct);
+        }
     }
 }
 
@@ -118,6 +172,18 @@ public sealed class ProactiveRemediationService : GraphServiceBase
     public Task SetAssignmentsAsync(string id, JsonArray assignments, CancellationToken ct = default)
     {
         var body = new JsonObject { ["deviceHealthScriptAssignments"] = assignments };
+        return Client.PostAsync($"{Resource}/{id}/assign", body, UseBeta, ct);
+    }
+}
+
+public sealed class PlatformScriptService : GraphServiceBase
+{
+    public PlatformScriptService(GraphHttpClient c) : base(c) { }
+    protected override string Resource => "deviceManagement/deviceManagementScripts";
+
+    public Task SetAssignmentsAsync(string id, JsonArray assignments, CancellationToken ct = default)
+    {
+        var body = new JsonObject { ["deviceManagementScriptAssignments"] = assignments };
         return Client.PostAsync($"{Resource}/{id}/assign", body, UseBeta, ct);
     }
 }

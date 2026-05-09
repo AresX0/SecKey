@@ -8,7 +8,13 @@
     <UseWPF>true</UseWPF>
     <RootNamespace>SecKey.App</RootNamespace>
     <AssemblyName>SecKey.App</AssemblyName>
+    <ApplicationIcon>Assets\JosephThePlatypus.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\JosephThePlatypus.ico" />
+    <Resource Include="Assets\PlatypusToolsLogo.png" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />

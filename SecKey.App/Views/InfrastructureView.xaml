@@ -1,0 +1,69 @@
+<UserControl x:Class="SecKey.App.Views.InfrastructureView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel Margin="24">
+        <Border DockPanel.Dock="Bottom" Margin="0,12,0,0" Padding="10,8" Background="#E8EEF9" BorderBrush="#C8D5EC" BorderThickness="1" CornerRadius="6">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Deployment Status:" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="{Binding DeploymentStatus}" Margin="10,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="#1F2937"/>
+            </Grid>
+        </Border>
+
+        <Expander DockPanel.Dock="Bottom" Margin="0,12,0,0" Header="Deployment History" IsExpanded="False">
+            <DataGrid ItemsSource="{Binding DeploymentHistory}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" MinHeight="120" MaxHeight="220">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Time" Binding="{Binding Timestamp}" Width="90"/>
+                    <DataGridTextColumn Header="Scope" Binding="{Binding Scope}" Width="180"/>
+                    <DataGridTextColumn Header="Stage" Binding="{Binding Stage}" Width="110"/>
+                    <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Expander>
+
+        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                <TextBlock Text="Full SecKey Infrastructure Deployment:" VerticalAlignment="Center"/>
+                <Button Content="Apply Full SecKey Environment" Command="{Binding ApplyFullEnvironmentCommand}" Padding="14,6" Margin="8,0,0,0"/>
+                <Button Content="Undo Full SecKey Environment" Command="{Binding UndoFullEnvironmentCommand}" Padding="14,6" Margin="8,0,0,0"/>
+            </StackPanel>
+
+            <Border Margin="0,0,0,12" Padding="12" Background="#F7FAFC" BorderBrush="#D7E2F0" BorderThickness="1" CornerRadius="6">
+                <StackPanel>
+                    <TextBlock Text="Optional Archive Feature Bundles" FontWeight="SemiBold" FontSize="16"/>
+                    <TextBlock Text="These bundles are excluded from the full deployment. Select the bundles you want, then click Apply or Undo manually." Margin="0,4,0,8" TextWrapping="Wrap" Foreground="#4B5563"/>
+                    <ItemsControl ItemsSource="{Binding OptionalFeatures}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" Margin="0,4,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Foreground="#6B7280"/>
+                                    </StackPanel>
+                                </CheckBox>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button Content="Apply Selected Optional Features" Command="{Binding ApplyOptionalFeaturesCommand}" Padding="14,6"/>
+                        <Button Content="Undo Selected Optional Features" Command="{Binding UndoOptionalFeaturesCommand}" Padding="14,6" Margin="8,0,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                <TextBlock Text="Additional Break-Glass Accounts (UPN/display name/symbolic id, comma-separated):" VerticalAlignment="Center"/>
+                <TextBox Text="{Binding AdditionalBreakGlassAccounts, UpdateSourceTrigger=PropertyChanged}" Width="520" Margin="8,0,0,0"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Import Exported Settings (Conditional Access / Intune JSON dir or zip):" VerticalAlignment="Center"/>
+                <TextBox Text="{Binding ExportPath, UpdateSourceTrigger=PropertyChanged}" Width="420" Margin="8,0,0,0"/>
+                <Button Content="Import Export" Command="{Binding ImportExportedSettingsCommand}" Padding="14,6" Margin="8,0,0,0"/>
+            </StackPanel>
+        </StackPanel>
+    </DockPanel>
+</UserControl>

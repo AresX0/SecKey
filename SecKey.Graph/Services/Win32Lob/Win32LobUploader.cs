@@ -76,13 +76,13 @@ public sealed class Win32LobUploader
             {
                 ["fileEncryptionInfo"] = new JsonObject
                 {
-                    ["encryptionKey"] = enc.Element("EncryptionKey")?.Value,
-                    ["macKey"] = enc.Element("macKey")?.Value,
-                    ["initializationVector"] = enc.Element("initializationVector")?.Value,
-                    ["mac"] = enc.Element("mac")?.Value,
+                    ["encryptionKey"] = NormalizeBase64Value(GetEncElement(enc, "EncryptionKey"), 32, "EncryptionKey"),
+                    ["macKey"] = NormalizeBase64Value(GetEncElement(enc, "MacKey"), 32, "MacKey"),
+                    ["initializationVector"] = NormalizeBase64Value(GetEncElement(enc, "InitializationVector"), 16, "InitializationVector"),
+                    ["mac"] = NormalizeBase64Value(GetEncElement(enc, "Mac"), 32, "Mac"),
                     ["profileIdentifier"] = "ProfileVersion1",
-                    ["fileDigest"] = enc.Element("fileDigest")?.Value,
-                    ["fileDigestAlgorithm"] = enc.Element("fileDigestAlgorithm")?.Value
+                    ["fileDigest"] = NormalizeBase64Value(GetEncElement(enc, "FileDigest"), 32, "FileDigest"),
+                    ["fileDigestAlgorithm"] = GetEncElement(enc, "FileDigestAlgorithm")
                 }
             };
 
@@ -136,6 +136,31 @@ public sealed class Win32LobUploader
         finally
         {
             try { File.Delete(innerPath); } catch { /* swallow */ }
+        }
+    }
+
+    // XML element names in Detection.xml vary in casing across intunewin tool versions; match case-insensitively.
+    private static string? GetEncElement(System.Xml.Linq.XElement parent, string name)
+        => parent.Elements()
+                 .FirstOrDefault(e => string.Equals(e.Name.LocalName, name, StringComparison.OrdinalIgnoreCase))
+                 ?.Value;
+
+    private static string NormalizeBase64Value(string? value, int expectedByteLength, string fieldName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            throw new InvalidOperationException($"Detection.xml is missing {fieldName}.");
+
+        try
+        {
+            var bytes = Convert.FromBase64String(value.Trim());
+            if (bytes.Length != expectedByteLength)
+                throw new InvalidOperationException($"Detection.xml {fieldName} decoded to {bytes.Length} bytes, expected {expectedByteLength}.");
+
+            return Convert.ToBase64String(bytes);
+        }
+        catch (FormatException ex)
+        {
+            throw new InvalidOperationException($"Detection.xml {fieldName} is not valid base64.", ex);
         }
     }
 
@@ -219,12 +244,49 @@ public sealed class Win32LobUploader
         }
         else // EXE or PS1
         {
-            b["installCommandLine"] = cfg.InstallCommandLine ?? "";
-            b["uninstallCommandLine"] = cfg.UninstallCommandLine ?? "";
+            var install = ResolveInstallCommandLine(cfg, setupFileName);
+            var uninstall = ResolveUninstallCommandLine(cfg, setupFileName);
+
+            b["installCommandLine"] = install;
+            b["uninstallCommandLine"] = uninstall;
             b["msiInformation"] = null;
         }
 
         return b;
+    }
+
+    private static string ResolveInstallCommandLine(IntuneAppConfig cfg, string setupFileName)
+    {
+        if (!string.IsNullOrWhiteSpace(cfg.InstallCommandLine))
+            return cfg.InstallCommandLine;
+
+        if (string.Equals(cfg.AppType, "PS1", StringComparison.OrdinalIgnoreCase))
+        {
+            var userInstall = cfg.InstallExperience.Equals("user", StringComparison.OrdinalIgnoreCase)
+                ? " -userInstall"
+                : string.Empty;
+            return $"powershell.exe -windowstyle hidden -noprofile -executionpolicy bypass -file .\\{cfg.PackageName}.ps1 -Install{userInstall}";
+        }
+
+        // Safe non-empty fallback for EXE-style packages when command lines are not explicitly provided.
+        return $".\\{setupFileName}";
+    }
+
+    private static string ResolveUninstallCommandLine(IntuneAppConfig cfg, string setupFileName)
+    {
+        if (!string.IsNullOrWhiteSpace(cfg.UninstallCommandLine))
+            return cfg.UninstallCommandLine;
+
+        if (string.Equals(cfg.AppType, "PS1", StringComparison.OrdinalIgnoreCase))
+        {
+            var userInstall = cfg.InstallExperience.Equals("user", StringComparison.OrdinalIgnoreCase)
+                ? " -userInstall"
+                : string.Empty;
+            return $"powershell.exe -windowstyle hidden -noprofile -executionpolicy bypass -file .\\{cfg.PackageName}.ps1 -UnInstall{userInstall}";
+        }
+
+        // Safe non-empty fallback for EXE-style packages when command lines are not explicitly provided.
+        return $".\\{setupFileName}";
     }
 
     private static IEnumerable<JsonNode> DefaultReturnCodesAsNodes()
@@ -245,8 +307,8 @@ public sealed class Win32LobUploader
         {
             var file = await _graph.GetAsync(fileRelative, beta: true, ct);
             var state = file?["uploadState"]?.GetValue<string>();
-            if (state == success) return file!;
-            if (state != pending)
+            if (string.Equals(state, success, StringComparison.OrdinalIgnoreCase)) return file!;
+            if (!string.Equals(state, pending, StringComparison.OrdinalIgnoreCase))
                 throw new SecKeyException($"File upload state is not successful: {state}");
             await Task.Delay(TimeSpan.FromSeconds(10), ct);
         }

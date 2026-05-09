@@ -1,6 +1,7 @@
 <UserControl x:Class="SecKey.App.Views.LoginView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Loaded="OnLoaded">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="B2V"/>
     </UserControl.Resources>
@@ -21,7 +22,10 @@
             <StackPanel Orientation="Horizontal" Margin="0,8">
                 <Button Content="Sign in" Command="{Binding SignInCommand}" Padding="14,6" Margin="0,0,8,0"/>
                 <Button Content="Sign out" Command="{Binding SignOutCommand}" Padding="14,6"/>
+                <Button Content="Validate Access" Command="{Binding ValidateAccessCommand}" Padding="14,6" Margin="8,0,0,0"/>
             </StackPanel>
+            <TextBlock Margin="0,6,0,0" Foreground="#6B7280" TextWrapping="Wrap"
+                       Text="Required for policy, scripts, and CA operations: Policy.ReadWrite.ConditionalAccess (or Policy.Read.All), DeviceManagementConfiguration.ReadWrite.All, DeviceManagementScripts.ReadWrite.All, Device.ReadWrite.All/Directory.ReadWrite.All, plus an admin role (Conditional Access Admin, Intune Admin, Security Admin, or Global Admin)."/>
             <TextBlock Text="{Binding Status}" Foreground="#374151" TextWrapping="Wrap" Margin="0,8"/>
             <ProgressBar IsIndeterminate="True" Height="4" Margin="0,8"
                          Visibility="{Binding Busy, Converter={StaticResource B2V}}"/>
