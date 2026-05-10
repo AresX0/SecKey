@@ -1,0 +1,140 @@
+<Window x:Class="SecKey.App.Views.PreferencesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="SecKey – Preferences"
+        Width="620" Height="520"
+        MinWidth="560" MinHeight="460"
+        WindowStartupLocation="CenterOwner"
+        Background="#0B1220"
+        Foreground="#F3F7FF"
+        FontFamily="Segoe UI">
+
+    <Window.Resources>
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#60AAFF"/>
+            <Setter Property="Margin" Value="0,16,0,6"/>
+        </Style>
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#9DAECF"/>
+            <Setter Property="Margin" Value="0,8,0,3"/>
+        </Style>
+        <Style x:Key="InputBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#101A2E"/>
+            <Setter Property="Foreground" Value="#F3F7FF"/>
+            <Setter Property="BorderBrush" Value="#1E3A5F"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style x:Key="ActionBtn" TargetType="Button">
+            <Setter Property="Background" Value="#1E4C8A"/>
+            <Setter Property="Foreground" Value="#F3F7FF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="18,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style x:Key="CancelBtn" TargetType="Button">
+            <Setter Property="Background" Value="#1A2440"/>
+            <Setter Property="Foreground" Value="#9DAECF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="18,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <StackPanel Grid.Row="0">
+            <TextBlock Text="⚙ Preferences" FontSize="20" FontWeight="Bold" Foreground="#F3F7FF"/>
+            <TextBlock Text="Configure SecKey connection and display settings." FontSize="12" Foreground="#6B84A8" Margin="0,4,0,0"/>
+            <Separator Background="#1E3A5F" Margin="0,12,0,0"/>
+        </StackPanel>
+
+        <!-- Scrollable Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+
+                <!-- ── Entra ID / Graph Connection ── -->
+                <TextBlock Style="{StaticResource SectionHeader}" Text="🔗  Entra ID / Graph Connection"/>
+
+                <TextBlock Style="{StaticResource FieldLabel}" Text="Tenant ID"/>
+                <TextBox x:Name="TbTenantId" Style="{StaticResource InputBox}"
+                         Text="{Binding TenantId, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Your Azure AD Tenant ID (GUID or domain, e.g. contoso.com)"/>
+
+                <TextBlock Style="{StaticResource FieldLabel}" Text="Graph App Registration Client ID"/>
+                <TextBox x:Name="TbClientId" Style="{StaticResource InputBox}"
+                         Text="{Binding GraphClientId, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Client ID of the app registration used to call Microsoft Graph. Leave blank to use the MS Graph PowerShell app."/>
+
+                <TextBlock Foreground="#6B84A8" FontSize="11" Margin="0,4,0,0" TextWrapping="Wrap"
+                           Text="Leave Client ID blank to use the built-in Microsoft Graph PowerShell app registration (14d82eec-...)."/>
+
+                <!-- ── Appearance ── -->
+                <TextBlock Style="{StaticResource SectionHeader}" Text="🎨  Appearance"/>
+
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <CheckBox IsChecked="{Binding IsDarkMode}" VerticalAlignment="Center"
+                              Foreground="#F3F7FF" FontSize="13"
+                              Content="  Dark Mode"
+                              Command="{Binding ToggleDarkModeCommand}"
+                              CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"/>
+                </StackPanel>
+
+                <!-- ── Backup ── -->
+                <TextBlock Style="{StaticResource SectionHeader}" Text="💾  Backup"/>
+
+                <TextBlock Style="{StaticResource FieldLabel}" Text="Default Backup Directory"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" x:Name="TbBackupDir" Style="{StaticResource InputBox}"
+                             Text="{Binding BackupDirectory, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="Root directory for Intune backups. Default: %LocalAppData%\SecKey\IntuneBackups"/>
+                    <Button Grid.Column="1" Content="Browse…" Style="{StaticResource CancelBtn}"
+                            Margin="6,0,0,0" Command="{Binding BrowseBackupDirectoryCommand}"/>
+                </Grid>
+
+                <!-- ── Data ── -->
+                <TextBlock Style="{StaticResource SectionHeader}" Text="🗃  Data"/>
+
+                <TextBlock Style="{StaticResource FieldLabel}" Text="SecKey Data Directory (read-only)"/>
+                <TextBlock Text="{Binding DataDirectory}" FontSize="12" Foreground="#6B84A8"
+                           TextWrapping="Wrap"/>
+
+                <Button Content="📂  Open Data Directory" Style="{StaticResource CancelBtn}"
+                        Margin="0,8,0,0" HorizontalAlignment="Left"
+                        Command="{Binding OpenDataDirectoryCommand}"/>
+
+                <Button Content="📂  Open Log Directory" Style="{StaticResource CancelBtn}"
+                        Margin="0,6,0,0" HorizontalAlignment="Left"
+                        Command="{Binding OpenLogDirectoryCommand}"/>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer Buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Cancel" Style="{StaticResource CancelBtn}" Margin="0,0,10,0"
+                    Command="{Binding CancelCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+            <Button Content="Save" Style="{StaticResource ActionBtn}"
+                    Command="{Binding SaveCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+        </StackPanel>
+    </Grid>
+</Window>

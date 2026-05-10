@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecKey - Security Platform - Help</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: #0B1220; color: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; }
+        header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        header p { font-size: 1.1em; opacity: 0.9; }
+        .toc { background: white; padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .toc h2 { color: #0B1220; margin-bottom: 15px; }
+        .toc ul { list-style: none; }
+        .toc li { margin: 8px 0; }
+        .toc a { color: #345084; text-decoration: none; transition: color 0.3s; }
+        .toc a:hover { color: #0B1220; text-decoration: underline; }
+        section { background: white; padding: 25px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        section h2 { color: #0B1220; border-bottom: 3px solid #345084; padding-bottom: 10px; margin-bottom: 15px; }
+        section h3 { color: #345084; margin-top: 20px; margin-bottom: 10px; }
+        .tab { margin-left: 20px; padding: 15px; background: #f9f9f9; border-left: 4px solid #345084; margin-bottom: 15px; border-radius: 4px; }
+        .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; border-radius: 4px; }
+        .info { background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin: 15px 0; border-radius: 4px; }
+        .success { background: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 15px 0; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        table th { background: #f0f0f0; padding: 10px; text-align: left; border: 1px solid #ddd; font-weight: bold; }
+        table td { padding: 10px; border: 1px solid #ddd; }
+        table tr:nth-child(even) { background: #f9f9f9; }
+        code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
+        .feature-list { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .feature-box { background: #f9f9f9; padding: 15px; border-radius: 4px; border-left: 4px solid #345084; }
+        .feature-box h4 { color: #0B1220; margin-bottom: 8px; }
+        footer { text-align: center; padding: 20px; color: #666; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 SecKey - Intune Configuration Manager</h1>
+            <p>Comprehensive Tenant Security Deployment & Management Tool</p>
+        </header>
+
+        <div class="toc">
+            <h2>📑 Table of Contents</h2>
+            <ul>
+                <li><a href="#overview">Overview & Features</a></li>
+                <li><a href="#work-inventory">Current Work Inventory</a></li>
+                <li><a href="#getting-started">Getting Started</a></li>
+                <li><a href="#tabs">Tab Reference</a></li>
+                <li><a href="#security-analysis">Security & Analysis Tools</a></li>
+                <li><a href="#deployment">Deployment Guide</a></li>
+                <li><a href="#skip-logic">Why Items Are Skipped</a></li>
+                <li><a href="#settings-reference">Settings Reference</a></li>
+                <li><a href="#troubleshooting">Troubleshooting</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+        </div>
+
+        <section id="overview">
+            <h2>📋 Overview & Features</h2>
+            <p><strong>SecKey</strong> is a comprehensive security and configuration platform for Azure/Entra ID, Intune, and endpoint hardening operations. It enables tenant-wide security deployments with detailed auditing, rollback capabilities, native analysis tools, and granular live-edit control over policy settings.</p>
+            
+            <h3>Core Capabilities</h3>
+            <div class="feature-list">
+                <div class="feature-box">
+                    <h4>Full Environment Deployment</h4>
+                    <p>Deploy entire security environments including policies, groups, users, and infrastructure in a single operation.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>Step-by-Step Control</h4>
+                    <p>Deploy individual components for granular control and testing.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>Infrastructure Management</h4>
+                    <p>Manage authentication contexts, admin units, reusable settings, and platform scripts.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>Deployment Auditing</h4>
+                    <p>Complete deployment history with detailed logging of all operations and outcomes.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>Rollback Support</h4>
+                    <p>Undo deployments to safely revert changes to the tenant.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>Export/Import Settings</h4>
+                    <p>Export existing tenant settings and import them back for consistency across environments.</p>
+                </div>
+            </div>
+
+            <h3>What Gets Deployed</h3>
+            <table>
+                <tr><th>Category</th><th>Description</th><th>Count</th></tr>
+                <tr><td>Conditional Access Policies</td><td>Session management, device compliance, sign-in risk policies</td><td>10+</td></tr>
+                <tr><td>Device Compliance Policies</td><td>BitLocker, TPM, Defender for Endpoint</td><td>3+</td></tr>
+                <tr><td>Device Configuration Profiles</td><td>AppLocker, network, hardening, update rings</td><td>9+</td></tr>
+                <tr><td>Endpoint Security Policies</td><td>Firewall, antivirus, account protection</td><td>11+</td></tr>
+                <tr><td>Device Settings Catalog</td><td>Advanced settings for Windows 11</td><td>4+</td></tr>
+                <tr><td>Entra Groups</td><td>Security and dynamic groups for policy targeting</td><td>21+</td></tr>
+                <tr><td>Entra Users</td><td>Break-glass accounts and service accounts</td><td>2+</td></tr>
+                <tr><td>Administrative Units</td><td>Scoped admin management</td><td>4</td></tr>
+                <tr><td>Platform Scripts</td><td>Automated remediation and updates</td><td>2+</td></tr>
+            </table>
+        </section>
+
+        <section id="work-inventory">
+            <h2>🧭 Current Work Inventory</h2>
+            <p>This release includes a broad expansion of native capabilities across deployment, Entra security operations, endpoint security tooling, and operational recovery features.</p>
+
+            <h3>Deployment & Policy Management</h3>
+            <ul>
+                <li>Live JSON policy setting editor integrated in Dashboard for per-setting edits.</li>
+                <li>Policy baseline snapshot and reset support for managed JSON files.</li>
+                <li>Native settings inventory with source attribution (native/override).</li>
+                <li>Expanded deployment UI and manifest-driven operational controls.</li>
+            </ul>
+
+            <h3>New Security And Utility Modules</h3>
+            <table>
+                <tr><th>Module</th><th>Primary Purpose</th></tr>
+                <tr><td>Advanced Forensics / Forensics Analyzer</td><td>Security investigation workflow and forensic triage support.</td></tr>
+                <tr><td>Security Analyzer</td><td>Consolidated security posture and diagnostics UI.</td></tr>
+                <tr><td>System Audit / System Hardening</td><td>Host security checks and remediation workflow.</td></tr>
+                <tr><td>Reboot Analyzer</td><td>Root-cause investigation for crashes/restarts and event history.</td></tr>
+                <tr><td>File Integrity</td><td>Baseline and drift detection for critical file paths.</td></tr>
+                <tr><td>Secure Wipe</td><td>Multiple secure data sanitization standards and execution modes.</td></tr>
+                <tr><td>Hash Scanner / YARA Scanner</td><td>Indicator and rule-based content screening.</td></tr>
+                <tr><td>Network Traffic</td><td>Inbound/outbound visibility and traffic-oriented auditing.</td></tr>
+                <tr><td>Certificate Manager</td><td>Certificate inventory, inspection, and export workflows.</td></tr>
+                <tr><td>Credential Manager / Security Vault</td><td>Sensitive data and local security secret management flows.</td></tr>
+                <tr><td>SSH Key Manager</td><td>Key generation and key handling workflow.</td></tr>
+                <tr><td>File Encryption Tool / Encrypted Clipboard</td><td>Secure data handling utilities.</td></tr>
+                <tr><td>CVE Search</td><td>Vulnerability lookup and analysis support.</td></tr>
+                <tr><td>Global Secure Access</td><td>Access and security posture operations support.</td></tr>
+                <tr><td>Intune Backup</td><td>Configuration backup/restore for policy and script assets.</td></tr>
+                <tr><td>Preferences</td><td>Application behavior and UI/runtime controls.</td></tr>
+            </table>
+
+            <h3>Platform Service Expansion</h3>
+            <ul>
+                <li>New core services for AD security analysis, crash analysis, secure wipe, file integrity, certificate management, and backup/restore.</li>
+                <li>New Graph service for Entra privileged role analysis, PIM analysis, risky app review, and IR-oriented policy/takeback actions.</li>
+                <li>Support classes and command infrastructure improvements for richer module orchestration.</li>
+            </ul>
+        </section>
+
+        <section id="getting-started">
+            <h2>🚀 Getting Started</h2>
+            
+            <h3>Step 1: Authentication</h3>
+            <p>Click <strong>"Sign In / Out"</strong> and authenticate with your tenant Global Administrator account.</p>
+            <div class="warning">⚠️ <strong>Security Note:</strong> You must have Global Administrator or equivalent role in Entra ID. Break-glass accounts are recommended.</div>
+
+            <h3>Step 2: Dashboard</h3>
+            <p>Review the Dashboard to verify your connection and see deployment status overview.</p>
+
+            <h3>Step 3: Choose Deployment Method</h3>
+            <div class="tab">
+                <strong>Option A: Full Deployment (Recommended for new environments)</strong><br>
+                Go to <strong>"Deploy/Remove Secure Keyboard infra"</strong> and click <strong>"Apply Full SecKey Environment"</strong>. This deploys all policies, groups, and infrastructure in the correct order.
+            </div>
+            <div class="tab">
+                <strong>Option B: Step-by-Step (Recommended for testing)</strong><br>
+                Go to <strong>"Compliance + Config"</strong> and select individual deployment steps from the dropdown. This lets you test each component.
+            </div>
+
+            <h3>Step 4: Monitor Deployment</h3>
+            <p>Watch the <strong>Deployment History</strong> at the bottom of each tab. Each row shows:</p>
+            <ul>
+                <li><code>Time</code> - When the operation occurred</li>
+                <li><code>Scope</code> - What component (e.g., "Policies", "Infrastructure")</li>
+                <li><code>Stage</code> - Start, Complete, or Failed</li>
+                <li><code>Message</code> - Details including Created/Updated/Skipped counts</li>
+            </ul>
+        </section>
+
+        <section id="tabs">
+            <h2>📱 Tab Reference</h2>
+
+            <h3>Sign In / Out</h3>
+            <p>Authenticates to your Entra ID tenant. Displays current authenticated user and permissions.</p>
+            <div class="success">✓ Validates your access and token before showing other tabs.</div>
+
+            <h3>Dashboard</h3>
+            <p>Overview of your environment:</p>
+            <ul>
+                <li>Count of groups, users, devices, policies deployed</li>
+                <li>Last deployment status and timestamp</li>
+                <li>Quick health checks and warnings</li>
+            </ul>
+
+            <h3>Deploy/Remove Secure Keyboard infra</h3>
+            <p><strong>Full SecKey Environment Apply/Undo</strong> - One-click deploy/remove all components in correct order.</p>
+            <p><strong>Optional Archive Feature Bundles</strong> - Manually deploy sub-components:</p>
+            <ul>
+                <li><strong>Administrative Units</strong> - Scoped admin delegation and management</li>
+                <li><strong>Reusable Settings</strong> - Policy templates for Defender, Autopilot, Microsoft 365</li>
+                <li><strong>Platform Scripts</strong> - Automated tasks (Defender updates, network config)</li>
+            </ul>
+            <p><strong>Additional Break-Glass Accounts</strong> - Add extra emergency access accounts beyond the default 2.</p>
+            <p><strong>Import Exported Settings</strong> - Import CA policies and Intune configs from JSON/zip.</p>
+
+            <h3>Intune Apps</h3>
+            <p>Manage Win32 and Store apps:</p>
+            <ul>
+                <li>View all deployed applications</li>
+                <li>Upload new .intunewin packages</li>
+                <li>Manage assignments by group</li>
+            </ul>
+
+            <h3>Compliance + Config</h3>
+            <p>Deploy security policies step-by-step:</p>
+            <ul>
+                <li>Compliance policies (BitLocker, TPM, Defender)</li>
+                <li>Device configuration (AppLocker, network, hardening)</li>
+                <li>Settings Catalog entries</li>
+            </ul>
+            <p>Choose from dropdown and click "Apply Selected Step".</p>
+
+            <h3>Groups</h3>
+            <p>Manage security groups for policy targeting:</p>
+            <ul>
+                <li>View all groups (static and dynamic)</li>
+                <li>Deploy group memberships</li>
+                <li>Filter by group type</li>
+            </ul>
+
+            <h3>Conditional Access</h3>
+            <p>Deploy Conditional Access policies:</p>
+            <ul>
+                <li>Session management and MFA</li>
+                <li>Device compliance enforcement</li>
+                <li>Sign-in risk policies</li>
+                <li>Geolocation and app-based restrictions</li>
+            </ul>
+
+            <h3>Device Tagging</h3>
+            <p>Apply organizational tags to devices:</p>
+            <ul>
+                <li>Tag devices by organizational unit</li>
+                <li>Bulk tag operations</li>
+                <li>View tagged device inventory</li>
+            </ul>
+
+            <h3>Upload App</h3>
+            <p>Upload and configure Win32 line-of-business applications for Intune deployment.</p>
+
+            <h3>Additional Module Tabs</h3>
+            <p>SecKey now includes additional tabs/views for endpoint security, forensic analysis, and defensive operations:</p>
+            <ul>
+                <li>Advanced Forensics, Forensics Analyzer, and Security Analyzer</li>
+                <li>System Audit and System Hardening</li>
+                <li>Reboot Analyzer, File Integrity, Secure Wipe</li>
+                <li>Hash Scanner, YARA Scanner, and Network Traffic</li>
+                <li>Certificate Manager and Credential Manager</li>
+                <li>Security Vault and SSH Key Manager</li>
+                <li>File Encryption Tool and Encrypted Clipboard</li>
+                <li>CVE Search, Global Secure Access, and Intune Backup</li>
+                <li>Preferences window and related runtime controls</li>
+            </ul>
+        </section>
+
+        <section id="security-analysis">
+            <h2>🔒 Security & Analysis Tools</h2>
+            <p>SecKey includes native security analysis and monitoring tools for comprehensive tenant and device security assessment.</p>
+
+            <h3>AD Security Analysis</h3>
+            <p>Analyze Active Directory security posture, privilege escalation risks, and configuration issues.</p>
+            <div class="tab">
+                <strong>Features:</strong>
+                <ul>
+                    <li>Domain discovery and FSMO role identification</li>
+                    <li>Privileged account analysis (Domain Admins, Enterprise Admins)</li>
+                    <li>Risky ACL detection and reporting</li>
+                    <li>GPO security assessment</li>
+                    <li>SYSVOL dangerous file scanning</li>
+                    <li>Kerberos delegation analysis</li>
+                    <li>AD Recycle Bin and SYSVOL replication status</li>
+                </ul>
+            </div>
+            <div class="info">ℹ️ Requires domain-joined machine and appropriate AD permissions. Results displayed with severity ratings (Critical, Warning, Info).</div>
+
+            <h3>System Hardening & Security Audit</h3>
+            <p>Audit system security settings and apply automated hardening measures.</p>
+            <div class="tab">
+                <strong>Audit Categories:</strong>
+                <ul>
+                    <li>File permissions and ACLs</li>
+                    <li>Windows Firewall configuration</li>
+                    <li>Windows Update status</li>
+                    <li>Installed software inventory</li>
+                    <li>Startup items and services</li>
+                    <li>Sensitive directory access</li>
+                    <li>Administrative accounts and elevation</li>
+                    <li>Antivirus and threat protection status</li>
+                    <li>Network communication (inbound/outbound)</li>
+                </ul>
+            </div>
+            <div class="success">✓ Many findings can be auto-fixed with one click. High-risk issues are prioritized for immediate action.</div>
+
+            <h3>Reboot & Crash Analyzer</h3>
+            <p>Analyze unexpected system reboots, Blue Screen events (BSODs), and application crashes.</p>
+            <div class="tab">
+                <strong>Analysis Includes:</strong>
+                <ul>
+                    <li>System uptime and boot time tracking</li>
+                    <li>Kernel-Power critical events (unexpected shutdowns)</li>
+                    <li>Blue Screen (BSOD) event collection and analysis</li>
+                    <li>Application crash detection</li>
+                    <li>Memory dump analysis</li>
+                    <li>Root cause identification with severity ratings</li>
+                    <li>Suggested fixes for common issues</li>
+                    <li>Configurable time range (7-90 days)</li>
+                </ul>
+            </div>
+            <div class="warning">⚠️ Analysis requires Event Log read permissions. Some dump files may require administrator privileges to analyze fully.</div>
+
+            <h3>File Integrity Monitor (FIM)</h3>
+            <p>Create baselines of file hashes and detect unauthorized changes to critical directories.</p>
+            <div class="tab">
+                <strong>Capabilities:</strong>
+                <ul>
+                    <li>SHA256 baseline creation for any directory</li>
+                    <li>Recursive directory scanning with progress reporting</li>
+                    <li>File comparison against baseline (detects added, modified, deleted files)</li>
+                    <li>Hash verification to confirm actual file changes</li>
+                    <li>JSON baseline export for version control</li>
+                    <li>Portable baselines for migration between machines</li>
+                </ul>
+            </div>
+            <div class="info">ℹ️ Useful for monitoring Windows system folders, application directories, or security-critical data folders. Large directories may take time on first scan.</div>
+
+            <h3>Intune Backup & Restore</h3>
+            <p>Create comprehensive backups of all Intune configurations and remediation scripts.</p>
+            <div class="tab">
+                <strong>Backup Includes:</strong>
+                <ul>
+                    <li>Intune app configurations and settings</li>
+                    <li>JSON policy definitions</li>
+                    <li>Remediation scripts</li>
+                    <li>Metadata and timestamps</li>
+                </ul>
+            </div>
+            <div class="tab">
+                <strong>Backup Management:</strong>
+                <ul>
+                    <li>Automatic naming: <code>IntuneBackup_YYYYMMDD_HHMMSS</code></li>
+                    <li>Custom backup names supported</li>
+                    <li>Backup size calculation and display</li>
+                    <li>List all available backups with creation dates</li>
+                    <li>Delete old or unnecessary backups</li>
+                </ul>
+            </div>
+            <div class="success">✓ Backups stored locally in AppData/Local/SecKey/IntuneBackups for easy recovery or migration to other machines.</div>
+
+            <h3>Additional Security Utility Modules</h3>
+            <div class="tab">
+                <strong>Certificate Manager:</strong> Enumerate certificate stores, inspect metadata, and export certificates for audit workflows.
+            </div>
+            <div class="tab">
+                <strong>Credential Manager / Security Vault:</strong> Manage security-sensitive credentials and secret records for operational use.
+            </div>
+            <div class="tab">
+                <strong>Hash Scanner / YARA Scanner:</strong> Perform indicator scanning and rule-based detection workflows on target files/paths.
+            </div>
+            <div class="tab">
+                <strong>Secure Wipe:</strong> Apply secure erasure routines (single-pass through advanced standards) for sensitive data handling.
+            </div>
+            <div class="tab">
+                <strong>File Encryption & Encrypted Clipboard:</strong> Improve data-at-rest and transient data handling security in operator workflows.
+            </div>
+            <div class="tab">
+                <strong>CVE Search / Global Secure Access / Network Traffic:</strong> Add vulnerability context, access controls, and traffic-awareness to remediation decisions.
+            </div>
+
+            <h3>Native JSON Policy Editor Workflow</h3>
+            <p>The Dashboard includes a live per-setting policy editor for managed JSON payloads.</p>
+            <ul>
+                <li>Filter and browse policy leaf settings by category/file/path.</li>
+                <li>Edit individual setting values directly and save immediately to source JSON.</li>
+                <li>Open source JSON file or related Azure portal link from the row action buttons.</li>
+                <li>Capture current JSON state as baseline snapshot.</li>
+                <li>Reset managed JSON files back to the saved baseline snapshot.</li>
+            </ul>
+            <div class="info">ℹ️ Changes made in the live editor are reflected in the underlying JSON used by deployment/import operations.</div>
+        </section>
+
+        <section id="deployment">
+            <h2>🔄 Deployment Guide</h2>
+
+            <h3>Full Environment Deployment Order</h3>
+            <p>The system automatically deploys components in this order to ensure dependencies are met:</p>
+            <ol>
+                <li><strong>Users</strong> - Entra ID users (break-glass accounts)</li>
+                <li><strong>Groups</strong> - Entra ID groups for targeting</li>
+                <li><strong>Scope Tags</strong> - RBAC scope tags</li>
+                <li><strong>Named Locations</strong> - Geographic locations for CA policies</li>
+                <li><strong>Conditional Access</strong> - CA policies (requires groups and locations first)</li>
+                <li><strong>Device Enrollment Restrictions</strong> - Enrollment controls</li>
+                <li><strong>Device Configuration</strong> - OMA-URI and CSP settings</li>
+                <li><strong>Device Compliance</strong> - Compliance rules</li>
+                <li><strong>Device Settings Catalog</strong> - Modern Windows 11 settings</li>
+                <li><strong>Store App Assignments</strong> - Microsoft Store app distribution</li>
+                <li><strong>Intune Applications</strong> - Win32 and custom apps</li>
+                <li><strong>Autopilot</strong> - Device enrollment profiles</li>
+                <li><strong>Enrollment Status Page</strong> - Device setup experience</li>
+                <li><strong>Endpoint Security</strong> - Firewall, antivirus, account protection</li>
+                <li><strong>Proactive Remediation Scripts</strong> - Automated fixes</li>
+                <li><strong>Break-Glass Enforcement</strong> - Add users to break-glass groups</li>
+            </ol>
+
+            <h3>Partial/Step-by-Step Deployment</h3>
+            <p>Go to <strong>Compliance + Config</strong> and select a specific step to deploy just that component. Useful for:</p>
+            <ul>
+                <li>Testing changes before full deployment</li>
+                <li>Updating individual policies without redeploying everything</li>
+                <li>Troubleshooting specific components</li>
+            </ul>
+
+            <h3>Rollback/Undo</h3>
+            <p>To undo deployments, click <strong>"Undo Full SecKey Environment"</strong>. This:</p>
+            <ul>
+                <li>Deletes all deployed policies and objects (by reverse order)</li>
+                <li>Removes users from break-glass groups</li>
+                <li>Skips non-destructive items like Store app assignments</li>
+            </ul>
+            <div class="warning">⚠️ <strong>Caution:</strong> Undo is destructive. Ensure no critical policies are in use before running.</div>
+        </section>
+
+        <section id="skip-logic">
+            <h2>⏭️ Why Items Are Skipped During Deployment</h2>
+
+            <p>The deployment engine skips items in these scenarios:</p>
+
+            <h3>1. Item Already Exists (No Update Needed)</h3>
+            <p><strong>Reason:</strong> A policy with the same name already exists and is identical to the manifest definition.</p>
+            <p><strong>Action:</strong> Skipped (no create, no update).</p>
+            <p><strong>Example:</strong> "Windows 11 Security Baseline" policy already deployed last week and hasn't changed.</p>
+
+            <h3>2. Store App Assignments (Non-Destructive)</h3>
+            <p><strong>Reason:</strong> Assigning apps to groups is additive. Removing them is not supported in this tool to prevent accidental unassignment.</p>
+            <p><strong>Action:</strong> Skipped during undo operations (see note below).</p>
+            <div class="info">ℹ️ To remove app assignments, use the Intune portal directly under <strong>Intune Apps → Manage → Assignment</strong>.</div>
+
+            <h3>3. Authentication Context Policies In Use</h3>
+            <p><strong>Reason:</strong> Authentication strength policies referenced by Conditional Access policies cannot be deleted directly by the Graph API.</p>
+            <p><strong>Action:</strong> Skipped during undo (silently, no error).</p>
+            <div class="info">ℹ️ To delete, first remove references in Conditional Access policies, then manually delete in the portal.</div>
+
+            <h3>4. File Format or Parsing Errors</h3>
+            <p><strong>Reason:</strong> JSON manifest file is malformed or missing required fields.</p>
+            <p><strong>Action:</strong> Logged and skipped; deployment continues with other items.</p>
+            <p><strong>Check:</strong> Review the deployment log for error messages.</p>
+
+            <h3>5. Insufficient Permissions</h3>
+            <p><strong>Reason:</strong> Your authenticated account lacks permissions to create/delete this resource type.</p>
+            <p><strong>Action:</strong> Error is logged; deployment continues. Check your Entra ID roles.</p>
+            <div class="warning">⚠️ Ensure your account has: <strong>Global Administrator</strong> or <strong>Policy Administrator</strong> + <strong>Compliance Administrator</strong> + <strong>Intune Administrator</strong> roles.</div>
+
+            <h3>6. Duplicate Detection in Groups</h3>
+            <p><strong>Reason:</strong> A group member is already assigned to the same group.</p>
+            <p><strong>Action:</strong> Skipped to avoid duplication errors.</p>
+
+            <h3>Understanding the Deployment Message</h3>
+            <p>Example: <code>Created 27 items, updated 20, deleted 0, skipped 99.</code></p>
+            <table>
+                <tr><th>Term</th><th>Meaning</th></tr>
+                <tr><td><strong>Created</strong></td><td>New policies/objects created in the tenant.</td></tr>
+                <tr><td><strong>Updated</strong></td><td>Existing objects with differences that were modified.</td></tr>
+                <tr><td><strong>Deleted</strong></td><td>Objects removed from the tenant (undo only).</td></tr>
+                <tr><td><strong>Skipped</strong></td><td>Items not acted upon (already exist, no changes, insufficient permissions, or by design).</td></tr>
+            </table>
+
+            <h3>High Skip Counts Are Normal</h3>
+            <p>On second and subsequent runs, expect high skip counts because:</p>
+            <ul>
+                <li>Policies are already created</li>
+                <li>Groups are already assigned</li>
+                <li>Users are already in place</li>
+            </ul>
+            <p>This is <strong>safe and expected</strong>. You can run deployments multiple times without harm.</p>
+        </section>
+
+        <section id="settings-reference">
+            <h2>⚙️ Settings Reference</h2>
+
+            <h3>Conditional Access Policies</h3>
+            <table>
+                <tr><th>Policy Name</th><th>Purpose</th><th>Applies To</th></tr>
+                <tr><td>Allow MFA & Compliant Device</td><td>Require MFA and device compliance</td><td>All users except break-glass</td></tr>
+                <tr><td>Allow MFA & AAD Join</td><td>Require MFA and Entra ID join</td><td>External users</td></tr>
+                <tr><td>Session Management</td><td>Sign-out after 1 hour of inactivity</td><td>All users</td></tr>
+                <tr><td>Block Legacy Auth</td><td>Prevent protocols before 2013</td><td>All users</td></tr>
+                <tr><td>Block Unsupported OS</td><td>Block Windows 7, unsupported versions</td><td>All users</td></tr>
+            </table>
+
+            <h3>Compliance Policies</h3>
+            <table>
+                <tr><th>Policy</th><th>Requirements</th></tr>
+                <tr><td>BitLocker</td><td>Require BitLocker encryption on C: drive</td></tr>
+                <tr><td>TPM 2.0</td><td>Require TPM 2.0 chipset</td></tr>
+                <tr><td>Defender</td><td>Real-time protection, signature updates</td></tr>
+                <tr><td>Firewall</td><td>Windows Firewall enabled for all profiles</td></tr>
+                <tr><td>Secure Boot</td><td>Secure Boot enabled</td></tr>
+            </table>
+
+            <h3>Device Configuration</h3>
+            <table>
+                <tr><th>Configuration</th><th>Details</th></tr>
+                <tr><td>AppLocker</td><td>Only Microsoft Store and approved LOB apps allowed</td></tr>
+                <tr><td>Network Hardening</td><td>VPN split tunneling disabled, DNS over HTTPS enforced</td></tr>
+                <tr><td>Windows Update</td><td>Monthly updates required within 7 days</td></tr>
+                <tr><td>Firewall Rules</td><td>Inbound blocked by default, outbound allowed</td></tr>
+            </table>
+
+            <h3>Entra ID Groups</h3>
+            <table>
+                <tr><th>Group</th><th>Purpose</th><th>Membership Type</th></tr>
+                <tr><td>SECKEY-Users</td><td>Regular end-users</td><td>Dynamic (based on attributes)</td></tr>
+                <tr><td>SECKEY-Devices</td><td>Managed devices</td><td>Dynamic (based on OS/compliance)</td></tr>
+                <tr><td>SECKEY-Admins</td><td>Administrative users</td><td>Static</td></tr>
+                <tr><td>SECKEY-BreakGlass</td><td>Emergency access accounts</td><td>Static</td></tr>
+            </table>
+
+            <h3>Administrative Units</h3>
+            <p>Scoped administrative units for delegated management:</p>
+            <ul>
+                <li><strong>CP.BreakGlass</strong> - Break-glass account management</li>
+                <li><strong>CP.SECKEY-Users</strong> - User management within SECKEY scope</li>
+                <li><strong>CP.SECKEY-Devices</strong> - Device management for SECKEY devices</li>
+                <li><strong>CP.SECKEY-SolutionAssets</strong> - Service accounts and solution resources</li>
+            </ul>
+        </section>
+
+        <section id="troubleshooting">
+            <h2>🔧 Troubleshooting</h2>
+
+            <h3>Deployment Fails: "Permission Denied"</h3>
+            <p><strong>Cause:</strong> Insufficient permissions.</p>
+            <p><strong>Solution:</strong> Verify your account has Global Administrator or all required admin roles in Entra ID.</p>
+
+            <h3>Deployment Fails: "Graph API Timeout"</h3>
+            <p><strong>Cause:</strong> Network issue or tenant load.</p>
+            <p><strong>Solution:</strong> Check your network connection and try again in a few minutes.</p>
+
+            <h3>High Skip Count</h3>
+            <p><strong>Cause:</strong> Policies already deployed.</p>
+            <p><strong>Solution:</strong> This is normal on subsequent runs. No action needed.</p>
+
+            <h3>Authentication Context Deletion Fails</h3>
+            <p><strong>Cause:</strong> Authentication strength policy is referenced by CA policies.</p>
+            <p><strong>Solution:</strong> Remove references in Conditional Access policies first, then retry undo.</p>
+
+            <h3>Cannot Delete Group</h3>
+            <p><strong>Cause:</strong> Group is still assigned to policies.</p>
+            <p><strong>Solution:</strong> Remove group from all policy assignments first in the Intune portal.</p>
+
+            <h3>App Upload Fails</h3>
+            <p><strong>Cause:</strong> .intunewin file is corrupted or oversized (&gt;500MB).</p>
+            <p><strong>Solution:</strong> Recreate the .intunewin using Microsoft Intune App Wrapping Tool.</p>
+        </section>
+
+        <section id="faq">
+            <h2>❓ Frequently Asked Questions</h2>
+
+            <h3>Q: Is it safe to run the full deployment multiple times?</h3>
+            <p><strong>A:</strong> Yes. Items that already exist are skipped. Running multiple times is idempotent (safe).</p>
+
+            <h3>Q: Can I undo just one component?</h3>
+            <p><strong>A:</strong> The GUI only supports full undo. To undo specific items, use the Intune portal directly.</p>
+
+            <h3>Q: How do I modify a policy after deployment?</h3>
+            <p><strong>A:</strong> Edit the JSON manifest file in the <code>JSON/</code> folder, then run the step-by-step deployment for that component. The system will update the policy.</p>
+
+            <h3>Q: What if a deployment fails mid-way?</h3>
+            <p><strong>A:</strong> The system is resilient and continues deploying remaining items. Check the deployment history for the failure, fix the manifest, and rerun.</p>
+
+            <h3>Q: Do I need to be connected to any VPN?</h3>
+            <p><strong>A:</strong> No, but break-glass accounts should only be used from controlled networks (Conditional Access may restrict access).</p>
+
+            <h3>Q: Can I export my tenant's current settings?</h3>
+            <p><strong>A:</strong> Yes, use <strong>Import Exported Settings</strong> on the Infrastructure tab to import existing CA and Intune JSON exports.</p>
+
+            <h3>Q: How often should I rerun deployments?</h3>
+            <p><strong>A:</strong> Only when you update manifests. After initial deployment, rerun only to apply policy changes.</p>
+
+            <h3>Q: What does "Skipped for Import-StoreAppsEntraGroupAssignmentList" mean?</h3>
+            <p><strong>A:</strong> App assignments are "soft-deleted" - the system doesn't remove them during undo to prevent accidental unassignment. To remove, use the Intune portal.</p>
+        </section>
+
+        <section>
+            <h2>✨ New in SecKey v1.2</h2>
+            <p>Major platform expansion across deployment controls, security tooling, and investigation workflows:</p>
+            <div class="feature-list">
+                <div class="feature-box">
+                    <h4>Live JSON Policy Editor</h4>
+                    <p>Edit individual policy values in-app, save directly to managed JSON, and manage default baseline snapshots/reset.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>Expanded Security Operations</h4>
+                    <p>New modules for certificate, credential, vault, wipe, traffic, hash, and YARA workflows.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>Forensics and Audit Stack</h4>
+                    <p>Advanced forensics, analyzer views, reboot/crash triage, and host security assessment with remediation controls.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>Entra Security Expansion</h4>
+                    <p>Additional privileged role/PIM analysis and IR-oriented controls in the Graph service layer.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>Backup and Integrity Enhancements</h4>
+                    <p>Strengthened backup/restore and integrity-monitor workflows for operational resilience.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>Inventory and Documentation Refresh</h4>
+                    <p>Current feature inventory and help guidance now aligned with the expanded module set.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>SecKey v1.2 - Security Platform for Entra, Intune, Endpoint Hardening, and Forensics | Documentation Last Updated: May 9, 2026</p>
+            <p>For support, contact your Intune Administrator or review deployment logs.</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -31,6 +31,12 @@
                 <Button Content="Undo Full SecKey Environment" Command="{Binding UndoFullEnvironmentCommand}" Padding="14,6" Margin="8,0,0,0"/>
             </StackPanel>
 
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                <TextBlock Text="Targeted Security Baseline Deployment:" VerticalAlignment="Center"/>
+                <Button Content="Apply WDAC + GSA Baseline" Command="{Binding DeployWdacAndGsaBaselineCommand}" Padding="14,6" Margin="8,0,0,0"/>
+                <Button Content="Undo WDAC + GSA Baseline" Command="{Binding UndoWdacAndGsaBaselineCommand}" Padding="14,6" Margin="8,0,0,0"/>
+            </StackPanel>
+
             <Border Margin="0,0,0,12" Padding="12" Background="#F7FAFC" BorderBrush="#D7E2F0" BorderThickness="1" CornerRadius="6">
                 <StackPanel>
                     <TextBlock Text="Optional Archive Feature Bundles" FontWeight="SemiBold" FontSize="16"/>
@@ -54,6 +60,29 @@
                 </StackPanel>
             </Border>
 
+            <Border Margin="0,0,0,12" Padding="12" Background="#F7FAFC" BorderBrush="#D7E2F0" BorderThickness="1" CornerRadius="6">
+                <StackPanel>
+                    <TextBlock Text="Single Manifest Step" FontWeight="SemiBold" FontSize="16"/>
+                    <TextBlock Text="Run one deployment command at a time for fine-grained parity with legacy CommandList workflows." Margin="0,4,0,8" TextWrapping="Wrap" Foreground="#4B5563"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <ComboBox Grid.Column="0"
+                                  ItemsSource="{Binding ManifestCommands}"
+                                  SelectedItem="{Binding SelectedManifestCommand, Mode=TwoWay}"
+                                  DisplayMemberPath="Display"
+                                  MinWidth="520"
+                                  Margin="0,0,8,0"/>
+                        <Button Grid.Column="1" Content="Apply Selected Command" Command="{Binding ApplySelectedManifestStepCommand}" Padding="14,6" Margin="0,0,8,0"/>
+                        <Button Grid.Column="2" Content="Undo Selected Command" Command="{Binding UndoSelectedManifestStepCommand}" Padding="14,6"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                 <TextBlock Text="Additional Break-Glass Accounts (UPN/display name/symbolic id, comma-separated):" VerticalAlignment="Center"/>
                 <TextBox Text="{Binding AdditionalBreakGlassAccounts, UpdateSourceTrigger=PropertyChanged}" Width="520" Margin="8,0,0,0"/>
@@ -62,8 +91,35 @@
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Import Exported Settings (Conditional Access / Intune JSON dir or zip):" VerticalAlignment="Center"/>
                 <TextBox Text="{Binding ExportPath, UpdateSourceTrigger=PropertyChanged}" Width="420" Margin="8,0,0,0"/>
+                <Button Content="Browse..." Command="{Binding BrowseExportPathCommand}" Padding="14,6" Margin="8,0,0,0"/>
                 <Button Content="Import Export" Command="{Binding ImportExportedSettingsCommand}" Padding="14,6" Margin="8,0,0,0"/>
             </StackPanel>
+
+            <Expander Margin="0,12,0,0" Header="Native Deployment Settings" IsExpanded="False">
+                <DataGrid ItemsSource="{Binding SettingsInventory}" AutoGenerateColumns="False" CanUserAddRows="False" MinHeight="140" MaxHeight="220">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Setting" Binding="{Binding DisplayName}" Width="220" IsReadOnly="True"/>
+                        <DataGridTemplateColumn Header="Value" Width="220">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Padding="4,2"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="160" IsReadOnly="True" ElementStyle="{StaticResource SettingSourceBadgeTextStyle}"/>
+                        <DataGridTemplateColumn Header="Actions" Width="190">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="Save" Command="{Binding DataContext.SaveSettingCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Padding="10,4" Margin="0,0,8,0"/>
+                                        <Button Content="Go to editor" Command="{Binding DataContext.NavigateToSettingCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Padding="10,4"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Expander>
         </StackPanel>
     </DockPanel>
 </UserControl>

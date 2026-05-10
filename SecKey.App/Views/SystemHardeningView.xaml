@@ -1,0 +1,44 @@
+<UserControl x:Class="SecKey.App.Views.SystemHardeningView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Background="{DynamicResource WindowBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="System Hardening Audit" FontSize="22" FontWeight="Bold" Foreground="White" Background="{DynamicResource SectionHeaderBrush}" Padding="16"/>
+
+        <WrapPanel Grid.Row="1" Margin="14,10,14,8">
+            <Button Content="Run Full Audit" Command="{Binding RunFullAuditCommand}" Margin="0,0,8,0" Padding="10,6"/>
+            <Button Content="Fix Selected Issue" Command="{Binding FixIssueCommand}" CommandParameter="{Binding SelectedItem, ElementName=AuditGrid}" Margin="0,0,8,0" Padding="10,6"/>
+            <Button Content="Cancel" Command="{Binding CancelCommand}" Padding="10,6"/>
+        </WrapPanel>
+
+        <Grid Grid.Row="2" Margin="14,0,14,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" BorderBrush="{DynamicResource StatusPanelBorderBrush}" BorderThickness="1" Background="{DynamicResource CardBrush}" Padding="8" Margin="0,0,6,0">
+                <TextBlock Text="{Binding CriticalCount, StringFormat=Critical: {0}}" FontWeight="SemiBold"/>
+            </Border>
+            <Border Grid.Column="1" BorderBrush="{DynamicResource StatusPanelBorderBrush}" BorderThickness="1" Background="{DynamicResource CardBrush}" Padding="8" Margin="0,0,6,0">
+                <TextBlock Text="{Binding WarningCount, StringFormat=Warnings: {0}}" FontWeight="SemiBold"/>
+            </Border>
+            <Border Grid.Column="2" BorderBrush="{DynamicResource StatusPanelBorderBrush}" BorderThickness="1" Background="{DynamicResource CardBrush}" Padding="8">
+                <TextBlock Text="{Binding PassCount, StringFormat=Info/Pass: {0}}" FontWeight="SemiBold"/>
+            </Border>
+        </Grid>
+
+        <DataGrid x:Name="AuditGrid" Grid.Row="3" Margin="14,0,14,8" ItemsSource="{Binding AuditResults}" AutoGenerateColumns="True" IsReadOnly="True"/>
+
+        <Border Grid.Row="4" Margin="14,0,14,12" Background="{DynamicResource StatusPanelBrush}" BorderBrush="{DynamicResource StatusPanelBorderBrush}" BorderThickness="1" Padding="8">
+            <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap"/>
+        </Border>
+    </Grid>
+</UserControl>

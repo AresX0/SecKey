@@ -15,7 +15,6 @@
         <SolidColorBrush x:Key="SidebarButtonBrush" Color="#1B2740"/>
         <SolidColorBrush x:Key="SidebarButtonHoverBrush" Color="#2A3B5F"/>
         <SolidColorBrush x:Key="SidebarButtonPressedBrush" Color="#345084"/>
-        <SolidColorBrush x:Key="MainSurfaceBrush" Color="#F3F6FB"/>
 
         <Style x:Key="NavButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="{StaticResource SidebarButtonBrush}"/>
@@ -31,7 +30,13 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="10">
-                            <ContentPresenter Margin="2,0,2,0" VerticalAlignment="Center" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                            <TextBlock Text="{TemplateBinding Content}"
+                                       Margin="2,0,2,0"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                       Foreground="#F3F7FF"
+                                       FontSize="{TemplateBinding FontSize}"
+                                       TextTrimming="CharacterEllipsis"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -41,7 +46,46 @@
                                 <Setter TargetName="border" Property="Background" Value="{StaticResource SidebarButtonPressedBrush}"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Opacity" Value="0.55"/>
+                                <Setter Property="Opacity" Value="1"/>
+                                <Setter Property="Foreground" Value="#F3F7FF"/>
+                                <Setter TargetName="border" Property="Background" Value="#243550"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="Menu">
+            <Setter Property="Foreground" Value="#F3F7FF"/>
+            <Setter Property="Background" Value="#101A2E"/>
+        </Style>
+
+        <Style TargetType="MenuItem">
+            <Setter Property="Foreground" Value="#F3F7FF"/>
+            <Setter Property="Background" Value="#101A2E"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <Grid>
+                                <ContentPresenter ContentSource="Header"
+                                                  RecognizesAccessKey="True"
+                                                  TextElement.Foreground="{TemplateBinding Foreground}"/>
+                                <Popup x:Name="PART_Popup" Placement="Bottom" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False">
+                                    <Border Background="#111827" BorderBrush="#334155" BorderThickness="1" Padding="2">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#1E3A8A"/>
+                            </Trigger>
+                            <Trigger Property="IsSubmenuOpen" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#1E3A8A"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -58,6 +102,27 @@
         <DataTemplate DataType="{x:Type vm:ConditionalAccessViewModel}"><v:ConditionalAccessView/></DataTemplate>
         <DataTemplate DataType="{x:Type vm:UploadAppViewModel}"><v:UploadAppView/></DataTemplate>
         <DataTemplate DataType="{x:Type vm:DeviceTaggingViewModel}"><v:DeviceTaggingView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SecurityAnalyzerViewModel}"><v:SecurityAnalyzerView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SystemHardeningViewModel}"><v:SystemHardeningView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:RebootAnalyzerViewModel}"><v:RebootAnalyzerView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:FileIntegrityViewModel}"><v:FileIntegrityView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:IntuneBackupViewModel}"><v:IntuneBackupView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:CertificateManagerViewModel}"><v:CertificateManagerView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SecureWipeViewModel}"><v:SecureWipeView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:NetworkTrafficViewModel}"><v:NetworkTrafficView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:HashScannerViewModel}"><v:HashScannerView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:CredentialManagerViewModel}"><v:CredentialManagerView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:EncryptedClipboardViewModel}"><v:EncryptedClipboardView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SshKeyManagerViewModel}"><v:SshKeyManagerView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:FileEncryptionToolViewModel}"><v:FileEncryptionToolView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SecurityVaultViewModel}"><v:SecurityVaultView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:YaraScannerViewModel}"><v:YaraScannerView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:CveSearchViewModel}"><v:CveSearchView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ForensicsAnalyzerViewModel}"><v:ForensicsAnalyzerView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AdvancedForensicsViewModel}"><v:AdvancedForensicsView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:GlobalSecureAccessViewModel}"><v:GlobalSecureAccessView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:WdacAppLockerViewModel}"><v:WdacAppLockerView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SystemAuditViewModel}"><v:SystemAuditView/></DataTemplate>
     </Window.Resources>
 
     <Grid Background="#0B1220">
@@ -74,9 +139,9 @@
                 <Separator/>
                 <MenuItem Header="E_xit" Command="{Binding ExitCommand}"/>
             </MenuItem>
-            <MenuItem Header="_View">
+                <MenuItem Header="_View">
                 <MenuItem Header="_Refresh" Command="{Binding RefreshCommand}" InputGestureText="F5"/>
-                <MenuItem Header="_Dark Mode" IsCheckable="True" IsChecked="True" Command="{Binding ToggleDarkModeCommand}"/>
+                    <MenuItem Header="_Dark Mode" IsCheckable="True" IsChecked="{Binding IsDarkMode, Mode=TwoWay}" Command="{Binding ToggleDarkModeCommand}"/>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_Open Help File" Command="{Binding OpenHelpCommand}"/>
@@ -118,17 +183,48 @@
                     </StackPanel>
                 </Border>
 
-                <StackPanel Grid.Row="2">
-                    <Button Content="Sign In / Out" Command="{Binding ShowLoginCommand}" Style="{StaticResource NavButtonStyle}"/>
-                    <Button Content="Dashboard" Command="{Binding ShowDashboardCommand}" Style="{StaticResource NavButtonStyle}"/>
-                    <Button Content="Deploy/Remove Secure Keyboard infra" Command="{Binding ShowInfrastructureCommand}" Style="{StaticResource NavButtonStyle}"/>
-                    <Button Content="Intune Apps" Command="{Binding ShowAppsCommand}" Style="{StaticResource NavButtonStyle}"/>
-                    <Button Content="Upload App" Command="{Binding ShowUploadCommand}" Style="{StaticResource NavButtonStyle}"/>
-                    <Button Content="Compliance + Config" Command="{Binding ShowPoliciesCommand}" Style="{StaticResource NavButtonStyle}"/>
-                    <Button Content="Groups" Command="{Binding ShowGroupsCommand}" Style="{StaticResource NavButtonStyle}"/>
-                    <Button Content="Conditional Access" Command="{Binding ShowCaCommand}" Style="{StaticResource NavButtonStyle}"/>
-                    <Button Content="Device Tagging" Command="{Binding ShowDeviceTaggingCommand}" Style="{StaticResource NavButtonStyle}"/>
-                </StackPanel>
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel>
+                        <Button Content="Sign In / Out" Command="{Binding ShowLoginCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Dashboard" Command="{Binding ShowDashboardCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Deploy/Remove Secure Keyboard infra" Command="{Binding ShowInfrastructureCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Intune Apps" Command="{Binding ShowAppsCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Upload App" Command="{Binding ShowUploadCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Compliance + Config" Command="{Binding ShowPoliciesCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Groups" Command="{Binding ShowGroupsCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Conditional Access" Command="{Binding ShowCaCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Device Tagging" Command="{Binding ShowDeviceTaggingCommand}" Style="{StaticResource NavButtonStyle}"/>
+
+                        <Separator Background="#2A3B5F" Margin="0,12,0,12" Height="1"/>
+
+                        <TextBlock Text="Deployment Extensions" Foreground="#9FB2D5" FontSize="11" Margin="12,8,0,8" FontWeight="SemiBold"/>
+                        <Button Content="Global Secure Access" Command="{Binding ShowGlobalSecureAccessCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="WDAC / AppLocker" Command="{Binding ShowWdacAppLockerCommand}" Style="{StaticResource NavButtonStyle}"/>
+
+                        <Separator Background="#2A3B5F" Margin="0,12,0,12" Height="1"/>
+
+                        <TextBlock Text="Security &amp; Analysis" Foreground="#9FB2D5" FontSize="11" Margin="12,8,0,8" FontWeight="SemiBold"/>
+                        <Button Content="AD Security Analysis" Command="{Binding ShowSecurityAnalyzerCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="System Hardening" Command="{Binding ShowSystemHardeningCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Reboot &amp; Crash Analysis" Command="{Binding ShowRebootAnalyzerCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="File Integrity Monitor" Command="{Binding ShowFileIntegrityCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Intune Backup" Command="{Binding ShowIntuneBackupCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Certificate Manager" Command="{Binding ShowCertificateManagerCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Credential Manager" Command="{Binding ShowCredentialManagerCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="SSH Key Manager" Command="{Binding ShowSshKeyManagerCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Encrypted Clipboard" Command="{Binding ShowEncryptedClipboardCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="File Encryption" Command="{Binding ShowFileEncryptionCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Security Vault" Command="{Binding ShowSecurityVaultCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Network Traffic" Command="{Binding ShowNetworkTrafficCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Hash Scanner" Command="{Binding ShowHashScannerCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="YARA Scanner" Command="{Binding ShowYaraScannerCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="CVE Search" Command="{Binding ShowCveSearchCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Forensics Analyzer" Command="{Binding ShowForensicsAnalyzerCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Advanced Forensics" Command="{Binding ShowAdvancedForensicsCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="System Audit" Command="{Binding ShowSystemAuditCommand}" Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="Secure Wipe" Command="{Binding ShowSecureWipeCommand}" Style="{StaticResource NavButtonStyle}"/>
+                    </StackPanel>
+                </ScrollViewer>
 
                 <TextBlock Grid.Row="3" Text="Tip: start with Sign In / Out and Validate Access before full deployment." Foreground="#8DA2C9" TextWrapping="Wrap" Margin="2,8,2,2"/>
             </Grid>
@@ -144,7 +240,7 @@
                 <TextBlock Text="Configuration Workspace" FontSize="18" FontWeight="SemiBold" Foreground="#ECF3FF"/>
             </Border>
 
-            <Border Grid.Row="1" Background="{StaticResource MainSurfaceBrush}" CornerRadius="16" Padding="0">
+            <Border Grid.Row="1" Background="{DynamicResource CardBrush}" CornerRadius="16" Padding="0">
                 <ContentControl Content="{Binding CurrentView}" Margin="0"/>
             </Border>
         </Grid>

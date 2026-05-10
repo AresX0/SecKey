@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Text.Json.Nodes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using SecKey.Core;
 using SecKey.App.Services;
 using SecKey.Graph;
@@ -15,15 +16,37 @@ public abstract partial class GraphPageViewModel : ObservableObject
 {
     protected readonly AuthState Auth;
     protected readonly IServiceProvider Services;
+    private readonly INativeDeploymentSettingsService _nativeSettings;
+    private string _settingsScope = "Dashboard";
 
     [ObservableProperty] private bool _busy;
     [ObservableProperty] private string? _statusMessage;
     public ObservableCollection<EntityRow> Items { get; } = new();
+    public ObservableCollection<DeploymentSettingItemViewModel> SettingsInventory { get; } = new();
 
     protected GraphPageViewModel(AuthState auth, IServiceProvider sp)
     {
         Auth = auth;
         Services = sp;
+        _nativeSettings = sp.GetRequiredService<INativeDeploymentSettingsService>();
+    }
+
+    protected void InitializeSettingsInventory(string scope)
+    {
+        _settingsScope = scope;
+        SettingsInventory.Clear();
+
+        foreach (var setting in _nativeSettings.GetSettingsForScope(scope))
+        {
+            SettingsInventory.Add(new DeploymentSettingItemViewModel(
+                setting.Key,
+                setting.Scope,
+                setting.DisplayName,
+                setting.Description,
+                setting.Source,
+                setting.Value,
+                setting.EditScope));
+        }
     }
 
     /// <summary>Builds a transient GraphHttpClient that uses the AuthState's current token provider.</summary>
@@ -58,6 +81,45 @@ public abstract partial class GraphPageViewModel : ObservableObject
             StatusMessage = $"Error: {ex.Message}";
         }
         finally { Busy = false; }
+    }
+
+    [RelayCommand]
+    private void SaveSetting(DeploymentSettingItemViewModel? setting)
+    {
+        if (setting is null)
+            return;
+
+        _nativeSettings.SaveValue(setting.Key, setting.Value);
+        setting.Source = "native-code+override";
+        StatusMessage = $"Saved setting '{setting.DisplayName}'.";
+    }
+
+    [RelayCommand]
+    private void NavigateToSetting(DeploymentSettingItemViewModel? setting)
+    {
+        if (setting is null)
+            return;
+
+        if (string.Equals(setting.EditScope, _settingsScope, StringComparison.OrdinalIgnoreCase))
+        {
+            StatusMessage = $"Edit '{setting.DisplayName}' in this tab and click Save.";
+            return;
+        }
+
+        var main = Services.GetService<MainViewModel>();
+        if (main is null)
+        {
+            StatusMessage = "Unable to navigate to target tab.";
+            return;
+        }
+
+        if (!main.NavigateToScope(setting.EditScope))
+        {
+            StatusMessage = $"No tab mapping for scope '{setting.EditScope}'.";
+            return;
+        }
+
+        StatusMessage = $"Navigated to {setting.EditScope} to edit '{setting.DisplayName}'.";
     }
 
     protected abstract IAsyncEnumerable<EntityRow> LoadAsync();

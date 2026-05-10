@@ -1,0 +1,34 @@
+<UserControl x:Class="SecKey.App.Views.EncryptedClipboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Encrypted Clipboard" FontSize="18" FontWeight="Bold" Margin="0,0,0,8"/>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,8">
+            <Button Content="Encrypt to Clipboard" Command="{Binding EncryptToClipboardCommand}"/>
+            <Button Content="Decrypt (from box/clipboard)" Command="{Binding DecryptEncryptedTextCommand}"/>
+        </StackPanel>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <GroupBox Header="Plain Text" Margin="0,0,6,0">
+                <TextBox Text="{Binding PlainText, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+            </GroupBox>
+            <GroupBox Grid.Column="1" Header="Encrypted (Base64)" Margin="6,0,0,0">
+                <TextBox Text="{Binding EncryptedText, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+            </GroupBox>
+        </Grid>
+
+        <TextBlock Grid.Row="3" Text="{Binding StatusMessage}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+    </Grid>
+</UserControl>

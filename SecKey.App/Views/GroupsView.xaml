@@ -32,6 +32,33 @@
         <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12">
             <Button Content="Deploy Users + Groups" Command="{Binding DeployGroupsCommand}" Padding="14,6" Margin="0,0,8,8"/>
         </WrapPanel>
+
+        <Expander DockPanel.Dock="Top" Margin="0,0,0,12" Header="Native Deployment Settings" IsExpanded="False">
+            <DataGrid ItemsSource="{Binding SettingsInventory}" AutoGenerateColumns="False" CanUserAddRows="False" MinHeight="140" MaxHeight="220">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Setting" Binding="{Binding DisplayName}" Width="220" IsReadOnly="True"/>
+                    <DataGridTemplateColumn Header="Value" Width="220">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Padding="4,2"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="160" IsReadOnly="True" ElementStyle="{StaticResource SettingSourceBadgeTextStyle}"/>
+                    <DataGridTemplateColumn Header="Actions" Width="190">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="Save" Command="{Binding DataContext.SaveSettingCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Padding="10,4" Margin="0,0,8,0"/>
+                                    <Button Content="Go to editor" Command="{Binding DataContext.NavigateToSettingCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Padding="10,4"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Expander>
+
         <DataGrid ItemsSource="{Binding Items}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" Width="*"/>

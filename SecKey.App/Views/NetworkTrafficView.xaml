@@ -1,0 +1,104 @@
+<UserControl x:Class="SecKey.App.Views.NetworkTrafficView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignHeight="700" d:DesignWidth="1000">
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="5" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Controls -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+            <Button Content="▶ Start Monitoring" Command="{Binding StartMonitoringCommand}"
+                    Background="#FF4CAF50" Foreground="White" Padding="12,6" Margin="0,0,4,0" FontWeight="Bold" />
+            <Button Content="⏹ Stop" Command="{Binding StopMonitoringCommand}"
+                    Background="#FFF44336" Foreground="White" Padding="12,6" Margin="0,0,12,0" />
+            <TextBlock Text="Refresh Interval (sec):" VerticalAlignment="Center" Margin="0,0,4,0" />
+            <TextBox Text="{Binding RefreshInterval, UpdateSourceTrigger=PropertyChanged}" Width="40"
+                     VerticalContentAlignment="Center" Margin="0,0,12,0" />
+            <Button Content="🔄 Refresh Connections" Command="{Binding RefreshConnectionsCommand}"
+                    Padding="12,6" Margin="0,0,12,0" />
+            <TextBlock VerticalAlignment="Center" Foreground="Gray">
+                <Run Text="Connections: " /><Run Text="{Binding ConnectionCount, Mode=OneWay}" FontWeight="Bold" />
+            </TextBlock>
+        </StackPanel>
+
+        <!-- Interface Bandwidth -->
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Interfaces}" AutoGenerateColumns="False"
+                  IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False"
+                  GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                  MaxHeight="180" Margin="0,0,0,4">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Interface" Binding="{Binding Name}" Width="180" />
+                <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="120" />
+                <DataGridTextColumn Header="Speed" Binding="{Binding Speed}" Width="80" />
+                <DataGridTextColumn Header="↑ Send Rate" Binding="{Binding SendRate}" Width="100" />
+                <DataGridTextColumn Header="↓ Recv Rate" Binding="{Binding ReceiveRate}" Width="100" />
+                <DataGridTextColumn Header="Total Sent" Binding="{Binding BytesSent}" Width="100" />
+                <DataGridTextColumn Header="Total Recv" Binding="{Binding BytesReceived}" Width="100" />
+                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="*" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <GridSplitter Grid.Row="2" Height="5" HorizontalAlignment="Stretch"
+                      Background="#CCCCCC" Cursor="SizeNS" ResizeDirection="Rows" />
+
+        <!-- Connections DataGrid -->
+        <DataGrid Grid.Row="3" ItemsSource="{Binding Connections}" AutoGenerateColumns="False"
+                  IsReadOnly="True" SelectionMode="Single" CanUserAddRows="False"
+                  CanUserDeleteRows="False" GridLinesVisibility="Horizontal"
+                  HeadersVisibility="Column" Margin="0,4,0,0">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" Width="70" />
+                <DataGridTextColumn Header="Local Address" Binding="{Binding DisplayLocal}" Width="200" />
+                <DataGridTextColumn Header="Remote Address" Binding="{Binding DisplayRemote}" Width="200" />
+                <DataGridTextColumn Header="State" Binding="{Binding State}" Width="120" />
+                <DataGridTextColumn Header="PID" Binding="{Binding ProcessId}" Width="60" />
+                <DataGridTextColumn Header="Process" Binding="{Binding ProcessName}" Width="*" MinWidth="100">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                            <Setter Property="ToolTip" Value="{Binding ProcessName}" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTemplateColumn Header="" Width="80">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="📋 Copy" Padding="6,2"
+                                    Command="{Binding DataContext.CopyConnectionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding State}" Value="LISTENING">
+                            <Setter Property="Foreground" Value="#2196F3" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding State}" Value="Established">
+                            <Setter Property="Foreground" Value="#4CAF50" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding State}" Value="TimeWait">
+                            <Setter Property="Foreground" Value="#FF9800" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding State}" Value="CloseWait">
+                            <Setter Property="Foreground" Value="#F44336" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+        </DataGrid>
+
+        <!-- Status Bar -->
+        <TextBlock Grid.Row="4" Text="{Binding StatusMessage}" Margin="0,4,0,0" Foreground="Gray" />
+    </Grid>
+</UserControl>

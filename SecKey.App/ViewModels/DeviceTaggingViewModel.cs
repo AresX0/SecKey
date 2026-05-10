@@ -13,7 +13,10 @@ public sealed partial class DeviceTaggingViewModel : GraphPageViewModel
     [ObservableProperty] private int _extensionAttributeNumber = 1;
     [ObservableProperty] private string _attributeValue = "SECKEY";
 
-    public DeviceTaggingViewModel(AuthState auth, IServiceProvider sp) : base(auth, sp) { }
+    public DeviceTaggingViewModel(AuthState auth, IServiceProvider sp) : base(auth, sp)
+    {
+        InitializeSettingsInventory("Device Tagging");
+    }
 
     protected override async IAsyncEnumerable<EntityRow> LoadAsync()
     {

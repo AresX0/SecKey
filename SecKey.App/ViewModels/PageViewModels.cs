@@ -5,6 +5,7 @@ using SecKey.Graph.Services.EntraID;
 using SecKey.Graph.Services.Intune;
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 
 namespace SecKey.App.ViewModels;
@@ -31,10 +32,22 @@ public sealed partial class OptionalFeatureSelectionViewModel : CommunityToolkit
 
 public sealed partial class DashboardViewModel : GraphPageViewModel
 {
-    [CommunityToolkit.Mvvm.ComponentModel.ObservableProperty] private string _deploymentStatus = "Idle.";
-    public ObservableCollection<DeploymentHistoryEntry> DeploymentHistory { get; } = new();
+    private readonly JsonPolicySettingsService _jsonPolicySettings = new();
+    private readonly List<JsonPolicySettingItemViewModel> _allPolicySettings = new();
 
-    public DashboardViewModel(AuthState auth, IServiceProvider sp) : base(auth, sp) { }
+    [CommunityToolkit.Mvvm.ComponentModel.ObservableProperty] private string _deploymentStatus = "Idle.";
+    [CommunityToolkit.Mvvm.ComponentModel.ObservableProperty] private string _policySettingsFilter = string.Empty;
+    public ObservableCollection<DeploymentHistoryEntry> DeploymentHistory { get; } = new();
+    public ObservableCollection<JsonPolicySettingItemViewModel> PolicySettings { get; } = new();
+
+    public DashboardViewModel(AuthState auth, IServiceProvider sp) : base(auth, sp)
+    {
+        InitializeSettingsInventory("Dashboard");
+        ReloadPolicySettings();
+    }
+
+    partial void OnPolicySettingsFilterChanged(string value)
+        => ApplyPolicySettingsFilter();
     protected override async IAsyncEnumerable<EntityRow> LoadAsync()
     {
         var c = BuildClient();
@@ -191,6 +204,121 @@ public sealed partial class DashboardViewModel : GraphPageViewModel
         }
     }
 
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void ReloadPolicySettings()
+    {
+        try
+        {
+            var repoRoot = DeploymentPageHelpers.ResolveRepoRoot();
+            _allPolicySettings.Clear();
+            _allPolicySettings.AddRange(_jsonPolicySettings.LoadAllSettings(repoRoot));
+            ApplyPolicySettingsFilter();
+            StatusMessage = $"Loaded {_allPolicySettings.Count} individual JSON settings for live editing.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to load policy settings: {ex.Message}";
+        }
+    }
+
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void SavePolicySetting(JsonPolicySettingItemViewModel? setting)
+    {
+        if (setting is null)
+            return;
+
+        if (_jsonPolicySettings.SaveSetting(setting, out var error))
+        {
+            StatusMessage = $"Saved {setting.DisplayName} to {setting.RelativeFilePath}. Changes are now live for the next deploy.";
+            return;
+        }
+
+        StatusMessage = $"Failed to save setting: {error}";
+    }
+
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void OpenPolicyJson(JsonPolicySettingItemViewModel? setting)
+    {
+        if (setting is null || !File.Exists(setting.AbsoluteFilePath))
+            return;
+
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = "explorer.exe",
+            Arguments = $"/select,\"{setting.AbsoluteFilePath}\"",
+            UseShellExecute = true
+        });
+    }
+
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void OpenAzureSetting(JsonPolicySettingItemViewModel? setting)
+    {
+        if (setting is null || string.IsNullOrWhiteSpace(setting.AzurePortalUrl))
+            return;
+
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = setting.AzurePortalUrl,
+            UseShellExecute = true
+        });
+    }
+
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void SetCurrentAsDefaultBaseline()
+    {
+        try
+        {
+            var repoRoot = DeploymentPageHelpers.ResolveRepoRoot();
+            var count = _jsonPolicySettings.SaveCurrentAsDefaults(repoRoot);
+            StatusMessage = $"Saved current managed JSON state as default baseline ({count} files).";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to save baseline: {ex.Message}";
+        }
+    }
+
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void ResetAllManagedJsonToDefaultBaseline()
+    {
+        try
+        {
+            var repoRoot = DeploymentPageHelpers.ResolveRepoRoot();
+            var count = _jsonPolicySettings.ResetToSavedDefaults(repoRoot);
+            if (count == 0)
+            {
+                StatusMessage = "No baseline snapshot found. Click 'Set Current As Default Baseline' first.";
+                return;
+            }
+
+            ReloadPolicySettings();
+            StatusMessage = $"Reset managed JSON files to saved baseline ({count} files restored).";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to reset to baseline: {ex.Message}";
+        }
+    }
+
+    private void ApplyPolicySettingsFilter()
+    {
+        var filter = (PolicySettingsFilter ?? string.Empty).Trim();
+        var rows = _allPolicySettings.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(filter))
+        {
+            rows = rows.Where(s =>
+                s.DisplayName.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
+                s.JsonPath.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
+                s.RelativeFilePath.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
+                s.Category.Contains(filter, StringComparison.OrdinalIgnoreCase));
+        }
+
+        PolicySettings.Clear();
+        foreach (var row in rows.Take(5000))
+            PolicySettings.Add(row);
+    }
+
     private void SetDeploymentStatus(string message)
         => DeploymentStatus = DeploymentPageHelpers.WithTimestamp(message);
 
@@ -203,7 +331,10 @@ public sealed partial class IntuneAppsViewModel : GraphPageViewModel
     [CommunityToolkit.Mvvm.ComponentModel.ObservableProperty] private string _deploymentStatus = "Idle.";
     public ObservableCollection<DeploymentHistoryEntry> DeploymentHistory { get; } = new();
 
-    public IntuneAppsViewModel(AuthState auth, IServiceProvider sp) : base(auth, sp) { }
+    public IntuneAppsViewModel(AuthState auth, IServiceProvider sp) : base(auth, sp)
+    {
+        InitializeSettingsInventory("Intune Apps");
+    }
     protected override IAsyncEnumerable<EntityRow> LoadAsync()
         => GraphPageHelpers.ListAsRowsAsync(new IntuneApplicationService(BuildClient()));
 
@@ -295,7 +426,10 @@ public sealed partial class PoliciesViewModel : GraphPageViewModel
         "Import-ProactiveRemediationScripts"
     };
 
-    public PoliciesViewModel(AuthState auth, IServiceProvider sp) : base(auth, sp) { }
+    public PoliciesViewModel(AuthState auth, IServiceProvider sp) : base(auth, sp)
+    {
+        InitializeSettingsInventory("Policies");
+    }
 
     protected override async IAsyncEnumerable<EntityRow> LoadAsync()
     {
@@ -349,7 +483,10 @@ public sealed partial class GroupsViewModel : GraphPageViewModel
     [CommunityToolkit.Mvvm.ComponentModel.ObservableProperty] private string _deploymentStatus = "Idle.";
     public ObservableCollection<DeploymentHistoryEntry> DeploymentHistory { get; } = new();
 
-    public GroupsViewModel(AuthState auth, IServiceProvider sp) : base(auth, sp) { }
+    public GroupsViewModel(AuthState auth, IServiceProvider sp) : base(auth, sp)
+    {
+        InitializeSettingsInventory("Groups");
+    }
     protected override IAsyncEnumerable<EntityRow> LoadAsync()
         => GraphPageHelpers.ListAsRowsAsync(new EntraIdGroupService(BuildClient()));
 
@@ -394,7 +531,10 @@ public sealed partial class ConditionalAccessViewModel : GraphPageViewModel
     [CommunityToolkit.Mvvm.ComponentModel.ObservableProperty] private string _deploymentStatus = "Idle.";
     public ObservableCollection<DeploymentHistoryEntry> DeploymentHistory { get; } = new();
 
-    public ConditionalAccessViewModel(AuthState auth, IServiceProvider sp) : base(auth, sp) { }
+    public ConditionalAccessViewModel(AuthState auth, IServiceProvider sp) : base(auth, sp)
+    {
+        InitializeSettingsInventory("Conditional Access");
+    }
     protected override IAsyncEnumerable<EntityRow> LoadAsync()
         => GraphPageHelpers.ListAsRowsAsync(new ConditionalAccessPolicyService(BuildClient()));
 

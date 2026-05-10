@@ -35,6 +35,79 @@
             <Button Content="Deploy Groups" Command="{Binding DeployGroupsCommand}" Padding="14,6" Margin="0,0,8,8"/>
             <Button Content="Deploy Conditional Access" Command="{Binding DeployConditionalAccessCommand}" Padding="14,6" Margin="0,0,8,8"/>
         </WrapPanel>
+
+        <Expander DockPanel.Dock="Top" Margin="0,0,0,12" Header="Native Deployment Settings" IsExpanded="True">
+            <DataGrid ItemsSource="{Binding SettingsInventory}" AutoGenerateColumns="False" CanUserAddRows="False" MinHeight="180" MaxHeight="260">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Setting" Binding="{Binding DisplayName}" Width="220" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*" IsReadOnly="True"/>
+                    <DataGridTemplateColumn Header="Value" Width="180">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Padding="4,2"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="160" IsReadOnly="True" ElementStyle="{StaticResource SettingSourceBadgeTextStyle}"/>
+                    <DataGridTemplateColumn Header="Actions" Width="200">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="Save" Command="{Binding DataContext.SaveSettingCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Padding="10,4" Margin="0,0,8,0"/>
+                                    <Button Content="Go to editor" Command="{Binding DataContext.NavigateToSettingCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Padding="10,4"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Expander>
+
+        <Expander DockPanel.Dock="Top" Margin="0,0,0,12" Header="Live JSON Policy Settings (Individual Editor)" IsExpanded="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <WrapPanel Margin="0,0,0,8">
+                    <TextBlock Text="Filter" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBox Width="320" Text="{Binding PolicySettingsFilter, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
+                    <Button Content="Reload" Command="{Binding ReloadPolicySettingsCommand}" Padding="12,4" Margin="0,0,8,0"/>
+                    <Button Content="Set Current As Default Baseline" Command="{Binding SetCurrentAsDefaultBaselineCommand}" Padding="12,4" Margin="0,0,8,0"/>
+                    <Button Content="Reset All Managed JSON To Baseline" Command="{Binding ResetAllManagedJsonToDefaultBaselineCommand}" Padding="12,4"/>
+                </WrapPanel>
+
+                <DataGrid Grid.Row="1" ItemsSource="{Binding PolicySettings}" AutoGenerateColumns="False" CanUserAddRows="False" MinHeight="220" MaxHeight="380" EnableRowVirtualization="True" EnableColumnVirtualization="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="170" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="File" Binding="{Binding RelativeFilePath}" Width="280" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Setting" Binding="{Binding DisplayName}" Width="170" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="JSON Path" Binding="{Binding JsonPath}" Width="260" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Type" Binding="{Binding ValueType}" Width="90" IsReadOnly="True"/>
+                        <DataGridTemplateColumn Header="Value" Width="260">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Padding="4,2"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Actions" Width="320">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="Save" Command="{Binding DataContext.SavePolicySettingCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Padding="10,4" Margin="0,0,6,0"/>
+                                        <Button Content="Open JSON" Command="{Binding DataContext.OpenPolicyJsonCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Padding="10,4" Margin="0,0,6,0"/>
+                                        <Button Content="Open Azure" Command="{Binding DataContext.OpenAzureSettingCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Padding="10,4"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Expander>
+
         <ItemsControl ItemsSource="{Binding Items}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>

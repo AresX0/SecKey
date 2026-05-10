@@ -1,0 +1,1310 @@
+<UserControl x:Class="SecKey.App.Views.SecurityAnalyzerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:SecKey.App.Converters"
+             xmlns:vm="clr-namespace:SecKey.App.ViewModels"
+             Background="{DynamicResource WindowBackgroundBrush}">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <conv:ListToStringConverter x:Key="ListToStringConverter"/>
+    </UserControl.Resources>
+    
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header and Connection -->
+        <GroupBox Grid.Row="0" Header="🔒 Active Directory Security Analyzer" Margin="0,0,0,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Target Domain:" VerticalAlignment="Center" Margin="5" />
+                <TextBox Grid.Column="1" Text="{Binding TargetDomain, UpdateSourceTrigger=PropertyChanged}" 
+                         Margin="5" ToolTip="Leave blank to use current domain" />
+
+                <TextBlock Grid.Column="2" Text="Target DC:" VerticalAlignment="Center" Margin="5" />
+                <TextBox Grid.Column="3" Text="{Binding TargetDc, UpdateSourceTrigger=PropertyChanged}" 
+                         Margin="5" ToolTip="Leave blank for auto-detection" />
+
+                <Button Grid.Column="4" Content="🔍 Discover Domain" Command="{Binding DiscoverDomainCommand}" 
+                        MinWidth="180" Margin="5" Background="#FF2196F3" Foreground="White" />
+
+                <!-- Domain Info Display -->
+                <StackPanel Grid.Row="1" Grid.ColumnSpan="5" Orientation="Horizontal" Margin="5">
+                    <TextBlock Text="Status: " FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding DomainInfo.DomainFqdn, FallbackValue='Not connected'}" Margin="0,0,20,0" />
+                    <TextBlock Text="DC: " FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding DomainInfo.ChosenDc, FallbackValue='-'}" Margin="0,0,20,0" />
+                    <TextBlock Text="PDC: " FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding DomainInfo.PdcEmulator, FallbackValue='-'}" />
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <!-- Analysis Options and Controls -->
+        <GroupBox Grid.Row="1" Header="⚙️ Analysis Options" Margin="0,0,0,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Checkboxes -->
+                <WrapPanel Grid.Column="0" Orientation="Horizontal" Margin="5">
+                    <CheckBox Content="Privileged Groups" IsChecked="{Binding AnalyzePrivilegedGroups}" Margin="5" />
+                    <CheckBox Content="ACLs of Interest" IsChecked="{Binding AnalyzeRiskyAcls}" Margin="5" />
+                    <CheckBox Content="GPO Analysis" IsChecked="{Binding AnalyzeGpos}" Margin="5" />
+                    <CheckBox Content="SYSVOL Scan" IsChecked="{Binding AnalyzeSysvol}" Margin="5" />
+                    <CheckBox Content="Kerberos Delegation" IsChecked="{Binding AnalyzeKerberosDelegation}" Margin="5" />
+                    <CheckBox Content="AdminCount" IsChecked="{Binding AnalyzeAdminCount}" Margin="5" />
+                    <Border Width="1" Background="Gray" Margin="10,2" />
+                    <CheckBox Content="Filter Safe Identities" IsChecked="{Binding FilterSafeIdentities}" Margin="5" 
+                              ToolTip="Exclude known-safe identities like SYSTEM, Domain Admins from ACL results" />
+                    <CheckBox Content="Forest Mode" IsChecked="{Binding IncludeForestMode}" Margin="5" 
+                              ToolTip="Include all domains in forest" />
+                </WrapPanel>
+
+                <!-- Action Buttons -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="5">
+                    <Button Content="▶️ Run Full Analysis" Command="{Binding RunFullAnalysisCommand}" 
+                            MinWidth="190" Margin="5" Background="#FF4CAF50" Foreground="White" FontWeight="SemiBold" />
+                    <Button Content="❌ Cancel" Command="{Binding CancelAnalysisCommand}" 
+                            MinWidth="180" Margin="5" Background="#FFF44336" Foreground="White" />
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <!-- Main Content - Tabbed Results -->
+        <TabControl Grid.Row="2" Margin="0,0,0,8">
+            <!-- Summary Tab -->
+            <TabItem Header="📊 Summary">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="300" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Finding Counts -->
+                    <GroupBox Header="Analysis Results" Margin="5">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Statistics Cards -->
+                            <UniformGrid Rows="1" Columns="5" Margin="5">
+                                <Border Background="#FFF44336" CornerRadius="5" Margin="5" Padding="10">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding CriticalFindings}" FontSize="24" FontWeight="Bold" 
+                                                   Foreground="{DynamicResource WindowForegroundBrush}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Critical" Foreground="{DynamicResource WindowForegroundBrush}" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#FFFF9800" CornerRadius="5" Margin="5" Padding="10">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding HighFindings}" FontSize="24" FontWeight="Bold" 
+                                                   Foreground="{DynamicResource WindowForegroundBrush}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="High" Foreground="{DynamicResource WindowForegroundBrush}" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#FFFFC107" CornerRadius="5" Margin="5" Padding="10">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding MediumFindings}" FontSize="24" FontWeight="Bold" 
+                                                   Foreground="Black" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Medium" Foreground="Black" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#FF8BC34A" CornerRadius="5" Margin="5" Padding="10">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding LowFindings}" FontSize="24" FontWeight="Bold" 
+                                                   Foreground="{DynamicResource WindowForegroundBrush}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Low" Foreground="{DynamicResource WindowForegroundBrush}" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#FF2196F3" CornerRadius="5" Margin="5" Padding="10">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding TotalFindings}" FontSize="24" FontWeight="Bold" 
+                                                   Foreground="{DynamicResource WindowForegroundBrush}" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Total" Foreground="{DynamicResource WindowForegroundBrush}" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
+
+                            <!-- Category Breakdown -->
+                            <StackPanel Grid.Row="1" Margin="10">
+                                <TextBlock Text="Findings by Category:" FontWeight="SemiBold" Margin="0,10,0,5" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Text="Privileged Members" />
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding PrivilegedMembers.Count}" FontWeight="SemiBold" />
+
+                                    <TextBlock Grid.Row="1" Text="ACLs of Interest" />
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding RiskyAcls.Count}" FontWeight="SemiBold" />
+
+                                    <TextBlock Grid.Row="2" Text="Risky GPOs" />
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding RiskyGpos.Count}" FontWeight="SemiBold" />
+
+                                    <TextBlock Grid.Row="3" Text="SYSVOL Files" />
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SysvolFiles.Count}" FontWeight="SemiBold" />
+
+                                    <TextBlock Grid.Row="4" Text="Kerberos Delegations" />
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding KerberosDelegations.Count}" FontWeight="SemiBold" />
+
+                                    <TextBlock Grid.Row="5" Text="AdminCount Anomalies" />
+                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding AdminCountAnomalies.Count}" FontWeight="SemiBold" />
+                                </Grid>
+
+                                <TextBlock Text="{Binding AnalysisDuration, StringFormat='Duration: {0:mm\\:ss}'}" 
+                                           Margin="0,15,0,0" FontStyle="Italic" />
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+
+                    <!-- Quick Actions -->
+                    <GroupBox Grid.Column="1" Header="Quick Actions" Margin="5">
+                        <StackPanel Margin="5">
+                            <Button Content="🔍 Privileged Groups Only" Command="{Binding RunPrivilegedAnalysisCommand}" 
+                                    Margin="5" Height="30" />
+                            <Button Content="🔐 ACL Analysis Only" Command="{Binding RunAclAnalysisCommand}" 
+                                    Margin="5" Height="30" />
+                            <Button Content="🎫 Delegation Analysis Only" Command="{Binding RunDelegationAnalysisCommand}" 
+                                    Margin="5" Height="30" />
+                            <Button Content="📁 SYSVOL Scan Only" Command="{Binding RunSysvolAnalysisCommand}" 
+                                    Margin="5" Height="30" />
+                            <Separator Margin="5,15" />
+                            <Button Content="📤 Export to CSV" Command="{Binding ExportToCsvCommand}" 
+                                    Margin="5" Height="30" Background="#FF9C27B0" Foreground="White" />
+                            <Button Content="📂 Open Database Folder" Command="{Binding OpenDatabaseFolderCommand}" 
+                                    Margin="5" Height="30" />
+                        </StackPanel>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+
+            <!-- Privileged Members Tab -->
+            <TabItem Header="👥 Privileged Members">
+                <DataGrid ItemsSource="{Binding PrivilegedMembers}" 
+                          SelectedItem="{Binding SelectedPrivilegedMember}"
+                          AutoGenerateColumns="False" IsReadOnly="True"
+                          CanUserSortColumns="True" CanUserResizeColumns="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Account" Binding="{Binding SamAccountName}" Width="150" />
+                        <DataGridTextColumn Header="Group" Binding="{Binding GroupName}" Width="150" />
+                        <DataGridTextColumn Header="Type" Binding="{Binding ObjectClass}" Width="80" />
+                        <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding IsEnabled}" Width="60" />
+                        <DataGridCheckBoxColumn Header="Pwd Never Expires" Binding="{Binding PasswordNeverExpires}" Width="100" />
+                        <DataGridCheckBoxColumn Header="Delegation" Binding="{Binding TrustedForDelegation}" Width="80" />
+                        <DataGridCheckBoxColumn Header="SPN" Binding="{Binding HasSpn}" Width="50" />
+                        <DataGridCheckBoxColumn Header="Nested" Binding="{Binding IsNested}" Width="60" />
+                        <DataGridTextColumn Header="Nested Path" Binding="{Binding NestedPath}" Width="200" />
+                        <DataGridTextColumn Header="Risky UAC Flags" Binding="{Binding RiskyUacFlags, Converter={StaticResource ListToStringConverter}}" Width="150" />
+                        <DataGridTextColumn Header="Password Last Set" Binding="{Binding PasswordLastSet, StringFormat='{}{0:yyyy-MM-dd}'}" Width="110" />
+                        <DataGridTextColumn Header="Last Logon" Binding="{Binding LastLogon, StringFormat='{}{0:yyyy-MM-dd}'}" Width="100" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
+            <!-- ACLs of Interest Tab -->
+            <TabItem Header="🔐 ACLs of Interest">
+                <DataGrid ItemsSource="{Binding RiskyAcls}" 
+                          SelectedItem="{Binding SelectedRiskyAcl}"
+                          AutoGenerateColumns="False" IsReadOnly="True"
+                          CanUserSortColumns="True" CanUserResizeColumns="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="70">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <Trigger Property="Text" Value="Critical">
+                                            <Setter Property="Background" Value="#FFF44336" />
+                                            <Setter Property="Foreground" Value="White" />
+                                        </Trigger>
+                                        <Trigger Property="Text" Value="High">
+                                            <Setter Property="Background" Value="#FFFF9800" />
+                                            <Setter Property="Foreground" Value="White" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Identity" Binding="{Binding IdentityReference}" Width="180" />
+                        <DataGridTextColumn Header="Rights" Binding="{Binding ActiveDirectoryRights}" Width="150" />
+                        <DataGridTextColumn Header="Object Type" Binding="{Binding ObjectTypeName}" Width="150" />
+                        <DataGridTextColumn Header="Target Object" Binding="{Binding ObjectDn}" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
+            <!-- Kerberos Delegation Tab -->
+            <TabItem Header="🎫 Kerberos Delegation">
+                <DataGrid ItemsSource="{Binding KerberosDelegations}" 
+                          SelectedItem="{Binding SelectedDelegation}"
+                          AutoGenerateColumns="False" IsReadOnly="True"
+                          CanUserSortColumns="True" CanUserResizeColumns="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="70">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <Trigger Property="Text" Value="Critical">
+                                            <Setter Property="Background" Value="#FFF44336" />
+                                            <Setter Property="Foreground" Value="White" />
+                                        </Trigger>
+                                        <Trigger Property="Text" Value="High">
+                                            <Setter Property="Background" Value="#FFFF9800" />
+                                            <Setter Property="Foreground" Value="White" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Account" Binding="{Binding SamAccountName}" Width="180" />
+                        <DataGridTextColumn Header="Type" Binding="{Binding ObjectClass}" Width="80" />
+                        <DataGridTextColumn Header="Delegation Type" Binding="{Binding DelegationType}" Width="180" />
+                        <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
+            <!-- SYSVOL Files Tab -->
+            <TabItem Header="📁 SYSVOL Files">
+                <DataGrid ItemsSource="{Binding SysvolFiles}" 
+                          AutoGenerateColumns="False" IsReadOnly="True"
+                          CanUserSortColumns="True" CanUserResizeColumns="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="70" />
+                        <DataGridTextColumn Header="File Name" Binding="{Binding FileName}" Width="200" />
+                        <DataGridTextColumn Header="Extension" Binding="{Binding Extension}" Width="70" />
+                        <DataGridTextColumn Header="Size" Binding="{Binding FileSize, StringFormat='{}{0:N0} bytes'}" Width="100" />
+                        <DataGridTextColumn Header="Created" Binding="{Binding CreationTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="130" />
+                        <DataGridTextColumn Header="Modified" Binding="{Binding LastWriteTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="130" />
+                        <DataGridTextColumn Header="SHA256" Binding="{Binding Sha256Hash}" Width="200" />
+                        <DataGridTextColumn Header="Path" Binding="{Binding FilePath}" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
+            <!-- AdminCount Tab -->
+            <TabItem Header="⚠️ AdminCount Anomalies">
+                <DataGrid ItemsSource="{Binding AdminCountAnomalies}" 
+                          AutoGenerateColumns="False" IsReadOnly="True"
+                          CanUserSortColumns="True" CanUserResizeColumns="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Account" Binding="{Binding SamAccountName}" Width="180" />
+                        <DataGridTextColumn Header="Type" Binding="{Binding ObjectClass}" Width="80" />
+                        <DataGridTextColumn Header="AdminCount" Binding="{Binding AdminCount}" Width="80" />
+                        <DataGridCheckBoxColumn Header="Currently Privileged" Binding="{Binding IsCurrentlyPrivileged}" Width="120" />
+                        <DataGridTextColumn Header="Issue" Binding="{Binding Issue}" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
+            <!-- Stale Accounts Tab -->
+            <TabItem Header="👻 Stale Accounts">
+                <Grid Margin="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="#1F2937" Padding="8" CornerRadius="4" Margin="0,0,0,8">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Stale Users: " Foreground="White" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding StaleUsers.Count}" Foreground="#FFB74D" FontWeight="Bold" />
+                            <TextBlock Text="   |   Stale Computers: " Foreground="White" FontWeight="SemiBold" Margin="16,0,0,0" />
+                            <TextBlock Text="{Binding StaleComputers.Count}" Foreground="#FFB74D" FontWeight="Bold" />
+                        </StackPanel>
+                    </Border>
+
+                    <GroupBox Grid.Row="1" Header="Inactive Users (90+ days)" Margin="0,0,0,8">
+                        <DataGrid ItemsSource="{Binding StaleUsers}" AutoGenerateColumns="False" IsReadOnly="True"
+                                  CanUserSortColumns="True" CanUserResizeColumns="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="User" Binding="{Binding SamAccountName}" Width="170" />
+                                <DataGridTextColumn Header="Days Inactive" Binding="{Binding DaysSinceLastLogon}" Width="110" />
+                                <DataGridTextColumn Header="Last Logon" Binding="{Binding LastLogon, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="140" />
+                                <DataGridCheckBoxColumn Header="Privileged" Binding="{Binding IsPrivileged}" Width="90" />
+                                <DataGridTextColumn Header="DN" Binding="{Binding DistinguishedName}" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </GroupBox>
+
+                    <GroupBox Grid.Row="2" Header="Inactive Computers (90+ days)">
+                        <DataGrid ItemsSource="{Binding StaleComputers}" AutoGenerateColumns="False" IsReadOnly="True"
+                                  CanUserSortColumns="True" CanUserResizeColumns="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Computer" Binding="{Binding SamAccountName}" Width="170" />
+                                <DataGridTextColumn Header="Days Inactive" Binding="{Binding DaysSinceLastLogon}" Width="110" />
+                                <DataGridTextColumn Header="Last Logon" Binding="{Binding LastLogon, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="140" />
+                                <DataGridTextColumn Header="OS" Binding="{Binding OperatingSystem}" Width="220" />
+                                <DataGridTextColumn Header="DN" Binding="{Binding DistinguishedName}" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+
+            <!-- LAPS Coverage Tab -->
+            <TabItem Header="🔐 LAPS Coverage">
+                <Grid Margin="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="#0F172A" Padding="8" CornerRadius="4" Margin="0,0,0,8">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Computers Missing LAPS: " Foreground="White" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding ComputersWithoutLaps.Count}" Foreground="#EF4444" FontWeight="Bold" />
+                        </StackPanel>
+                    </Border>
+
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding ComputersWithoutLaps}" AutoGenerateColumns="False" IsReadOnly="True"
+                              CanUserSortColumns="True" CanUserResizeColumns="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Computer" Binding="{Binding ComputerName}" Width="180" />
+                            <DataGridTextColumn Header="DN" Binding="{Binding DistinguishedName}" Width="340" />
+                            <DataGridTextColumn Header="OS" Binding="{Binding OperatingSystem}" Width="220" />
+                            <DataGridCheckBoxColumn Header="Has LAPS" Binding="{Binding HasLaps}" Width="90" />
+                            <DataGridTextColumn Header="Password Expiration" Binding="{Binding LapsPasswordExpiration, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="170" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- Attack Path Detection & Remediation Tab (Combined) -->
+            <TabItem Header="🎯 Attack Paths &amp; Remediation">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <Grid Margin="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" MinHeight="150" />
+                    </Grid.RowDefinitions>
+
+                    <!-- WhatIf Toggle - Applies to GPO Deployment and IR Operations -->
+                    <Border Grid.Row="0" Background="#FF263238" Padding="8" Margin="0,0,0,10" CornerRadius="4">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="⚠️ Mode:" VerticalAlignment="Center" Foreground="#FFFFAB40" FontWeight="Bold" Margin="0,0,10,0" />
+                            <CheckBox Grid.Column="1" Content="WhatIf (Dry Run) - Preview changes without making modifications" 
+                                      IsChecked="{Binding RemediationWhatIf}" 
+                                      VerticalAlignment="Center" FontWeight="Bold" Foreground="#FF4CAF50"
+                                      ToolTip="When checked, GPO deployments and IR operations will only simulate - no actual changes made" />
+                            <TextBlock Grid.Column="2" Text="Exempted Users:" VerticalAlignment="Center" Foreground="{DynamicResource WindowForegroundBrush}" Margin="20,0,5,0" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Attack Path Detection Buttons -->
+                    <GroupBox Grid.Row="1" Header="🔍 Attack Path Detection" Margin="0,0,0,10">
+                        <WrapPanel Margin="5">
+                            <Button Content="🔍 Full Attack Path Scan" Command="{Binding RunAttackPathScanCommand}"
+                                    MinWidth="160" Margin="5" Background="#FF9C27B0" Foreground="White" FontWeight="SemiBold"
+                                    ToolTip="Scan for unconstrained delegation, Kerberoasting, AS-REP roasting, DCSync, SID History, and more" />
+                            <Button Content="🔐 Audit LAPS" Command="{Binding AuditLapsCommand}"
+                                    MinWidth="120" Margin="5" Background="#FF2196F3" Foreground="White"
+                                    ToolTip="Check LAPS deployment coverage across domain computers" />
+                            <Button Content="🔑 Find GPP Passwords" Command="{Binding FindGppPasswordsCommand}"
+                                    MinWidth="150" Margin="5" Background="#FFF44336" Foreground="White"
+                                    ToolTip="Scan SYSVOL for Group Policy Preferences with embedded passwords" />
+                            <Button Content="👻 Find Stale Accounts" Command="{Binding FindStaleAccountsCommand}"
+                                    MinWidth="160" Margin="5" Background="#FFFF9800" Foreground="White"
+                                    ToolTip="Find inactive user and computer accounts (90+ days)" />
+                            <Button Content="🧹 Remove Orphan AdminCount" Command="{Binding RemoveAdminCountCommand}" 
+                                    MinWidth="200" Margin="5" Background="#FF2196F3" Foreground="White"
+                                    ToolTip="Remove AdminCount attribute from accounts no longer in protected groups" />
+                        </WrapPanel>
+                    </GroupBox>
+
+                    <!-- Security GPO Deployment -->
+                    <GroupBox Grid.Row="2" Header="🛡️ Security GPO Deployment (uses WhatIf mode)" Margin="0,0,0,10">
+                        <WrapPanel Margin="5">
+                            <Button Content="🖨️ PrintNightmare" Command="{Binding DeployPrintNightmareGpoCommand}"
+                                    MinWidth="130" Margin="5" Background="#FF4CAF50" Foreground="White"
+                                    ToolTip="Deploy Point and Print restrictions GPO (CVE-2021-34527)" />
+                            <Button Content="📡 LLMNR/NBT-NS" Command="{Binding DeployLlmnrDisableGpoCommand}"
+                                    MinWidth="130" Margin="5" Background="#FF4CAF50" Foreground="White"
+                                    ToolTip="Disable LLMNR and NetBIOS name resolution" />
+                            <Button Content="📝 SMB Signing" Command="{Binding DeploySmbSigningGpoCommand}"
+                                    MinWidth="120" Margin="5" Background="#FF4CAF50" Foreground="White"
+                                    ToolTip="Enforce SMB signing to prevent relay attacks" />
+                            <Button Content="🛡️ Credential Guard" Command="{Binding DeployCredentialGuardGpoCommand}"
+                                    MinWidth="140" Margin="5" Background="#FF4CAF50" Foreground="White"
+                                    ToolTip="Enable Credential Guard for virtualization-based security" />
+                        </WrapPanel>
+                    </GroupBox>
+
+                    <!-- IR Remediation Section -->
+                    <GroupBox Grid.Row="3" Header="🚨 IR Remediation (uses WhatIf mode)" Margin="0,0,0,10">
+                        <Grid Margin="5">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Exempted Users and Settings -->
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,5">
+                                <TextBlock Text="Exempted Users (comma-separated):" VerticalAlignment="Center" Margin="0,0,5,0" />
+                                <TextBox Text="{Binding ExemptedUsers, UpdateSourceTrigger=PropertyChanged}" 
+                                         Width="400" Margin="0,0,10,0" 
+                                         ToolTip="UPNs of users to EXCLUDE from remediation (e.g., admin@domain.com)" />
+                                <CheckBox Content="Reset Passwords" IsChecked="{Binding TakebackResetPasswords}" Margin="5" />
+                                <CheckBox Content="Revoke Sessions" IsChecked="{Binding TakebackRevokeSessions}" Margin="5" />
+                                <CheckBox Content="Remove from Roles" IsChecked="{Binding TakebackRemoveRoles}" Margin="5" />
+                            </StackPanel>
+
+                            <!-- Entra ID Operations -->
+                            <WrapPanel Grid.Row="1" Margin="0,5,0,5">
+                                <TextBlock Text="☁️ Entra ID:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,10,0" />
+                                <Button Content="🎯 Tenant Takeback" Command="{Binding TakebackTenantCommand}" 
+                                        MinWidth="150" Margin="5" Background="#FFE53935" Foreground="White" FontWeight="Bold"
+                                        ToolTip="Reset passwords, revoke sessions, remove roles for privileged users" />
+                                <Button Content="🔑 Mass Password Reset" Command="{Binding MassPasswordResetCommand}" 
+                                        MinWidth="160" Margin="5" Background="#FFFF9800" Foreground="White"
+                                        ToolTip="Reset passwords for ALL users (except exempted)" />
+                                <Button Content="🔒 Revoke All Tokens" Command="{Binding RevokeAllTokensCommand}" 
+                                        MinWidth="150" Margin="5" Background="#FF9C27B0" Foreground="White"
+                                        ToolTip="Revoke refresh tokens for ALL users" />
+                                <Button Content="👤 Remove Priv Roles" Command="{Binding RemovePrivRoleMembersCommand}" 
+                                        MinWidth="150" Margin="5" Background="#FF673AB7" Foreground="White"
+                                        ToolTip="Remove all members from privileged roles" />
+                                <Button Content="🗑 Remove App Owners" Command="{Binding RemoveAppOwnersCommand}" 
+                                        MinWidth="160" Margin="5" Background="#FF795548" Foreground="White"
+                                        ToolTip="Export &amp; remove owners from risky applications" />
+                                <Button Content="🚫 Disable CA Policies" Command="{Binding DisableCaPoliciesCommand}" 
+                                        MinWidth="160" Margin="5" Background="#FF607D8B" Foreground="White"
+                                        ToolTip="Disable all Conditional Access policies during IR" />
+                                <Button Content="🛡️ Deploy IR CA" Command="{Binding DeployIrCaPoliciesCommand}" 
+                                        MinWidth="140" Margin="5" Background="#FF00BCD4" Foreground="White"
+                                        ToolTip="Deploy IR Conditional Access policy templates (report-only)" />
+                                <Button Content="📤 Export Synced Users" Command="{Binding ExportSyncedUsersCommand}" 
+                                        MinWidth="160" Margin="5" Background="#FF3F51B5" Foreground="White"
+                                        ToolTip="Export synced users for conversion to cloud-only" />
+                            </WrapPanel>
+
+                            <!-- Warning -->
+                            <Border Grid.Row="2" Background="#FFFF5252" Padding="5" CornerRadius="4">
+                                <TextBlock Text="⚠️ IR Operations are DESTRUCTIVE! Always add your UPN to Exempted Users. Start with WhatIf enabled." 
+                                           Foreground="{DynamicResource WindowForegroundBrush}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            </Border>
+                        </Grid>
+                    </GroupBox>
+
+                    <!-- AD Operations Section - Krbtgt, Replication, LAPS, SYSVOL -->
+                    <GroupBox Grid.Row="4" Header="🔧 AD Operations (uses WhatIf mode)" Margin="0,0,0,10">
+                        <Grid Margin="5">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Critical AD Operations -->
+                            <WrapPanel Grid.Row="0" Margin="0,0,0,5">
+                                <Button Content="🔑 Reset Krbtgt" Command="{Binding ResetKrbtgtCommand}"
+                                        MinWidth="130" Margin="5" Background="#FFF44336" Foreground="White" FontWeight="Bold"
+                                        ToolTip="Reset the krbtgt account password (do twice with 10+ hours between)" />
+                                <Button Content="🔄 Force Replication" Command="{Binding ForceReplicationCommand}"
+                                        MinWidth="140" Margin="5" Background="#FF2196F3" Foreground="White"
+                                        ToolTip="Force AD replication between all domain controllers" />
+                                <Button Content="📁 SYSVOL Auth Restore" Command="{Binding AuthoritativeSysvolRestoreCommand}"
+                                        MinWidth="160" Margin="5" Background="#FFFF9800" Foreground="White" FontWeight="Bold"
+                                        ToolTip="Perform authoritative SYSVOL restore (makes this DC's SYSVOL the source)" />
+                            </WrapPanel>
+
+                            <!-- LAPS Configuration -->
+                            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                <TextBlock Text="🔐 LAPS:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,10,0" />
+                                <TextBlock Text="Target OU:" VerticalAlignment="Center" Margin="0,0,5,0" />
+                                <TextBox Text="{Binding LapsTargetOu, UpdateSourceTrigger=PropertyChanged}" 
+                                         Width="300" Margin="0,0,10,0" 
+                                         ToolTip="OU path for LAPS implementation (e.g., OU=Workstations,DC=contoso,DC=com)" />
+                                <TextBlock Text="Admin Group:" VerticalAlignment="Center" Margin="0,0,5,0" />
+                                <TextBox Text="{Binding LapsAdminGroup, UpdateSourceTrigger=PropertyChanged}" 
+                                         Width="150" Margin="0,0,10,0" 
+                                         ToolTip="Group that can read LAPS passwords (default: Domain Admins)" />
+                                <Button Content="🔐 Implement LAPS" Command="{Binding ImplementLapsCommand}"
+                                        MinWidth="130" Margin="5" Background="#FF4CAF50" Foreground="White"
+                                        ToolTip="Configure LAPS permissions on the specified OU" />
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+
+                    <!-- Status Summary -->
+                    <Border Grid.Row="5" Background="#FF1E88E5" Padding="5" Margin="0,0,0,10" CornerRadius="4">
+                        <TextBlock Text="📊 Scan results and findings will appear in the grid below. Use WhatIf mode to preview GPO and IR operations before executing." 
+                                   Foreground="{DynamicResource WindowForegroundBrush}" TextWrapping="Wrap" />
+                    </Border>
+
+                    <!-- Results DataGrid -->
+                    <DataGrid Grid.Row="6" ItemsSource="{Binding SecurityFindings}" 
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              CanUserSortColumns="True" CanUserResizeColumns="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="180" />
+                            <DataGridTemplateColumn Header="Severity" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Severity}" FontWeight="Bold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Severity}" Value="Critical">
+                                                            <Setter Property="Foreground" Value="#FFD32F2F"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Severity}" Value="High">
+                                                            <Setter Property="Foreground" Value="#FFF57C00"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Severity}" Value="Medium">
+                                                            <Setter Property="Foreground" Value="#FFFFC107"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Object" Binding="{Binding ObjectName}" Width="200" />
+                            <DataGridTextColumn Header="Type" Binding="{Binding ObjectType}" Width="80" />
+                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="350">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextWrapping" Value="Wrap"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Recommendation" Binding="{Binding Recommendation}" Width="*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextWrapping" Value="Wrap"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- History Tab -->
+            <TabItem Header="📜 History">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <DataGrid ItemsSource="{Binding AnalysisHistory}" 
+                              SelectedItem="{Binding SelectedHistoryRun}"
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              CanUserSortColumns="True" Margin="0,0,5,0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50" />
+                            <DataGridTextColumn Header="Time" Binding="{Binding RunTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="130" />
+                            <DataGridTextColumn Header="Domain" Binding="{Binding TargetDomain}" Width="150" />
+                            <DataGridTextColumn Header="Total" Binding="{Binding TotalFindings}" Width="60" />
+                            <DataGridTextColumn Header="Critical" Binding="{Binding CriticalCount}" Width="60" />
+                            <DataGridTextColumn Header="High" Binding="{Binding HighCount}" Width="60" />
+                            <DataGridTextColumn Header="Medium" Binding="{Binding MediumCount}" Width="60" />
+                            <DataGridTextColumn Header="Duration" Binding="{Binding DurationSeconds, StringFormat='{}{0:F1}s'}" Width="70" />
+                            <DataGridCheckBoxColumn Header="Complete" Binding="{Binding IsComplete}" Width="70" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <StackPanel Grid.Column="1" Width="150">
+                        <Button Content="📥 Load Selected" Command="{Binding LoadSelectedRunCommand}" Margin="5" Height="30" />
+                        <Button Content="📤 Export Selected" Command="{Binding ExportSelectedRunCommand}" Margin="5" Height="30" />
+                        <Button Content="🗑️ Delete Selected" Command="{Binding DeleteSelectedRunCommand}" Margin="5" Height="30" 
+                                Background="#FFF44336" Foreground="White" />
+                        <Separator Margin="5,15" />
+                        <Button Content="🔄 Refresh" Command="{Binding LoadHistoryCommand}" Margin="5" Height="30" />
+                        <Button Content="🗑️ Clear All" Command="{Binding ClearHistoryCommand}" Margin="5" Height="30" 
+                                Background="#FFFF9800" Foreground="White" />
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- Deployment Tab -->
+            <TabItem Header="🚀 Deployment">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="400" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Deployment Options -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="10">
+                            <!-- OU Structure Options -->
+                            <GroupBox Header="📁 Tiered Admin OU Structure (BILL Model)" Margin="0,0,0,10">
+                                <StackPanel Margin="10">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Column="0" Text="Base OU Name:" VerticalAlignment="Center" Margin="0,0,10,5" />
+                                        <TextBox Grid.Column="1" Text="{Binding DeploymentBaseName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,20,5" />
+
+                                        <TextBlock Grid.Column="2" Text="Tier 0 Name:" VerticalAlignment="Center" Margin="0,0,10,5" />
+                                        <TextBox Grid.Column="3" Text="{Binding Tier0Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,5" />
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Tier 1 Name:" VerticalAlignment="Center" Margin="0,0,10,5" />
+                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Tier1Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,20,5" />
+
+                                        <TextBlock Grid.Row="1" Grid.Column="2" Text="Tier 2 Name:" VerticalAlignment="Center" Margin="0,0,10,5" />
+                                        <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding Tier2Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,5" />
+                                    </Grid>
+
+                                    <Separator Margin="0,10" />
+
+                                    <TextBlock Text="Sub-OUs to Create:" FontWeight="SemiBold" Margin="0,0,0,5" />
+                                    <WrapPanel Orientation="Horizontal">
+                                        <CheckBox Content="SecureKeyboard" IsChecked="{Binding CreatePawOus}" Margin="0,0,20,5" />
+                                        <CheckBox Content="Service Accounts" IsChecked="{Binding CreateServiceAccountOus}" Margin="0,0,20,5" />
+                                        <CheckBox Content="Groups" IsChecked="{Binding CreateGroupsOus}" Margin="0,0,20,5" />
+                                        <CheckBox Content="Users" IsChecked="{Binding CreateUsersOus}" Margin="0,0,20,5" />
+                                        <CheckBox Content="Devices (Servers/Workstations)" IsChecked="{Binding CreateDevicesOus}" Margin="0,0,20,5" />
+                                    </WrapPanel>
+
+                                    <CheckBox Content="Protect OUs from accidental deletion" IsChecked="{Binding ProtectOusFromDeletion}" 
+                                              Margin="0,10,0,5" FontWeight="SemiBold" />
+
+                                    <Button Content="🏗️ Deploy Tiered OU Structure" Command="{Binding DeployTieredOusCommand}" 
+                                            MinWidth="220" Height="35" Margin="0,10,0,0" HorizontalAlignment="Left"
+                                            Background="#FF4CAF50" Foreground="White" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </GroupBox>
+
+                            <!-- GPO Options -->
+                            <GroupBox Header="📜 Tiered GPO Deployment (PLATYPUS/BILL)" Margin="0,0,0,10">
+                                <ScrollViewer MaxHeight="400" VerticalScrollBarVisibility="Auto">
+                                    <StackPanel Margin="10">
+                                        <!-- Quick Deploy GPOs -->
+                                        <Expander Header="⚡ Quick Deploy GPOs (Basic Baseline)" IsExpanded="True" Margin="0,0,0,10">
+                                            <StackPanel Margin="20,10,0,0">
+                                                <CheckBox Content="Password Policy (14+ chars, complexity, 90-day expiry)" IsChecked="{Binding DeployPasswordPolicyGpo}" Margin="0,0,0,5" />
+                                                <CheckBox Content="Advanced Audit Policy (Logon, Object Access, etc.)" IsChecked="{Binding DeployAuditPolicyGpo}" Margin="0,0,0,5" />
+                                                <CheckBox Content="Security Baseline (Disable LM, SMB signing, LDAP signing)" IsChecked="{Binding DeploySecurityBaselineGpo}" Margin="0,0,0,5" />
+                                                <CheckBox Content="SecureKeyboard Security Policy (Credential Guard, AppLocker)" IsChecked="{Binding DeployPawGpo}" Margin="0,0,0,5" />
+                                            </StackPanel>
+                                        </Expander>
+
+                                        <!-- Tier 0 GPOs -->
+                                        <Expander Header="🔒 Tier 0 GPOs - Domain Controllers / Critical Servers" IsExpanded="False" Margin="0,0,0,10">
+                                            <StackPanel Margin="20,10,0,0">
+                                                <CheckBox Content="Baseline Audit Policies - Tier 0 Servers" IsChecked="{Binding DeployT0BaselineAudit}" Margin="0,0,0,5" 
+                                                          ToolTip="Enhanced audit policies for Tier 0 servers. Success/Failure auditing for security events." />
+                                                <CheckBox Content="Disallow DSRM Login - DC ONLY" IsChecked="{Binding DeployT0DisallowDsrm}" Margin="0,0,0,5"
+                                                          ToolTip="Prevents DSRM (Directory Services Restore Mode) network logon. Critical for DC security." />
+                                                <CheckBox Content="Admin Block - Top Level" IsChecked="{Binding DeployT0DomainBlock}" Margin="0,0,0,5"
+                                                          ToolTip="Blocks Tier 0 accounts from logging into non-Tier 0 systems. Essential for tiering." />
+                                                <CheckBox Content="Domain Controllers Hardening - DC Only" IsChecked="{Binding DeployT0DomainControllers}" Margin="0,0,0,5"
+                                                          ToolTip="Security hardening for Domain Controllers." />
+                                                <CheckBox Content="ESX Admins Restricted Group - DC Only" IsChecked="{Binding DeployT0EsxAdmins}" Margin="0,0,0,5"
+                                                          ToolTip="Empties ESX Admins group via Restricted Groups to prevent VMware privilege escalation (CVE-2024-37085)." />
+                                                <CheckBox Content="User Rights Assignments - Tier 0 Servers" IsChecked="{Binding DeployT0UserRights}" Margin="0,0,0,5"
+                                                          ToolTip="Restricts logon rights on Tier 0 to only Tier 0 operators. Allow log on locally, Remote Desktop, etc." />
+                                                <CheckBox Content="Restricted Groups - Tier 0 Servers" IsChecked="{Binding DeployT0RestrictedGroups}" Margin="0,0,0,5"
+                                                          ToolTip="Controls local admin membership on Tier 0 servers. Administrators, Remote Desktop Users groups." />
+                                            </StackPanel>
+                                        </Expander>
+
+                                        <!-- Tier 1 GPOs -->
+                                        <Expander Header="🖥️ Tier 1 GPOs - Servers" IsExpanded="False" Margin="0,0,0,10">
+                                            <StackPanel Margin="20,10,0,0">
+                                                <CheckBox Content="Tier 1 Operators in Local Admin - Tier 1 Servers" IsChecked="{Binding DeployT1LocalAdmin}" Margin="0,0,0,5"
+                                                          ToolTip="Adds Tier 1 Operators group to local Administrators on Tier 1 servers." />
+                                                <CheckBox Content="User Rights Assignments - Tier 1 Servers" IsChecked="{Binding DeployT1UserRights}" Margin="0,0,0,5"
+                                                          ToolTip="Restricts logon rights on Tier 1 servers to Tier 1 operators. Blocks Tier 0 and Tier 2." />
+                                                <CheckBox Content="Restricted Groups - Tier 1 Servers" IsChecked="{Binding DeployT1RestrictedGroups}" Margin="0,0,0,5"
+                                                          ToolTip="Controls local admin membership on Tier 1 servers." />
+                                            </StackPanel>
+                                        </Expander>
+
+                                        <!-- Tier 2 GPOs -->
+                                        <Expander Header="💻 Tier 2 GPOs - Workstations" IsExpanded="False" Margin="0,0,0,10">
+                                            <StackPanel Margin="20,10,0,0">
+                                                <CheckBox Content="Tier 2 Operators in Local Admin - Tier 2 Devices" IsChecked="{Binding DeployT2LocalAdmin}" Margin="0,0,0,5"
+                                                          ToolTip="Adds Tier 2 Operators group to local Administrators on workstations." />
+                                                <CheckBox Content="User Rights Assignments - Tier 2 Devices" IsChecked="{Binding DeployT2UserRights}" Margin="0,0,0,5"
+                                                          ToolTip="Restricts logon rights on workstations to Tier 2 operators. Blocks Tier 0 and Tier 1." />
+                                                <CheckBox Content="Restricted Groups - Tier 2 Devices" IsChecked="{Binding DeployT2RestrictedGroups}" Margin="0,0,0,5"
+                                                          ToolTip="Controls local admin membership on workstations." />
+                                            </StackPanel>
+                                        </Expander>
+
+                                        <!-- Cross-Tier GPOs -->
+                                        <Expander Header="🌐 Cross-Tier GPOs - All Devices" IsExpanded="False" Margin="0,0,0,10">
+                                            <StackPanel Margin="20,10,0,0">
+                                                <CheckBox Content="Disable SMBv1 - Top Level" IsChecked="{Binding DeployDisableSmb1}" Margin="0,0,0,5"
+                                                          ToolTip="Disables SMBv1 client and server across all systems. Link to domain root." />
+                                                <CheckBox Content="Disable WDigest - Top Level" IsChecked="{Binding DeployDisableWDigest}" Margin="0,0,0,5"
+                                                          ToolTip="Disables WDigest credential caching to prevent plaintext password storage in memory." />
+                                                <CheckBox Content="Reset Machine Account Password" IsChecked="{Binding DeployResetMachinePassword}" Margin="0,0,0,5"
+                                                          ToolTip="Configures automatic machine account password rotation (default: 30 days)." />
+                                            </StackPanel>
+                                        </Expander>
+
+                                        <!-- Security Groups -->
+                                        <Expander Header="👥 Security Groups" IsExpanded="True" Margin="0,0,0,10">
+                                            <StackPanel Margin="20,10,0,0">
+                                                <CheckBox Content="Create Tiered Security Groups" IsChecked="{Binding CreateTierGroups}" Margin="0,0,0,5"
+                                                          ToolTip="Creates security groups for each tier: Operators, SecureKeyboard Users, Service Accounts, Local Admins, plus IR/DVRL groups." FontWeight="SemiBold" />
+                                                <TextBlock Text="Groups created: Tier X - Operators, SecureKeyboard Users, Service Accounts, Local Admins, IR - Emergency Access, DVRL - Deny Logon All Tiers"
+                                                           Foreground="{DynamicResource SecondaryTextBrush}" FontStyle="Italic" TextWrapping="Wrap" Margin="20,0,0,5" />
+                                            </StackPanel>
+                                        </Expander>
+
+                                        <Separator Margin="0,5" />
+
+                                        <CheckBox Content="Link GPOs to corresponding OUs after creation" IsChecked="{Binding LinkGposToOus}" Margin="0,5,0,5"
+                                                  ToolTip="Automatically link created GPOs to their target OUs. Requires tiered OU structure to exist." />
+
+                                        <TextBlock Text="⚠️ GPOs are created as shells. Configure settings in Group Policy Management Console or use PLATYPUS PowerShell module." 
+                                                   Foreground="Orange" Margin="0,10,0,5" TextWrapping="Wrap" />
+
+                                        <Button Content="📜 Deploy Selected GPOs" Command="{Binding DeployBaselineGposCommand}" 
+                                                MinWidth="200" Height="35" Margin="0,10,0,0" HorizontalAlignment="Left"
+                                                Background="#FF2196F3" Foreground="White" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </GroupBox>
+
+                            <!-- MDE/MDI Proxy in a Box -->
+                            <GroupBox Header="🌐 MDE/MDI Proxy in a Box" Margin="0,0,0,10">
+                                <StackPanel Margin="10">
+                                    <TextBlock Text="Generate a Squid proxy setup script for Microsoft Defender for Endpoint (MDE) and Microsoft Defender for Identity (MDI). Useful for air-gapped or restricted network environments." 
+                                               TextWrapping="Wrap" Margin="0,0,0,10" Foreground="{DynamicResource SecondaryTextBrush}" />
+                                    
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="120" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Column="0" Text="Proxy Port:" VerticalAlignment="Center" Margin="0,0,10,5" />
+                                        <TextBox Grid.Column="1" Text="{Binding ProxyPort, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,20,5" 
+                                                 ToolTip="Port for Squid proxy (default: 3128)" />
+
+                                        <CheckBox Grid.Column="2" Grid.ColumnSpan="2" Content="Allow SSH (Port 22) through firewall" IsChecked="{Binding ProxyAllowSsh}" 
+                                                  VerticalAlignment="Center" Margin="0,0,0,5" ToolTip="Enable SSH access for remote management" />
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Endpoints:" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                        <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Orientation="Horizontal">
+                                            <CheckBox Content="MDE (Defender for Endpoint)" IsChecked="{Binding ProxyIncludeMde}" Margin="0,0,20,0" 
+                                                      ToolTip="Include Microsoft Defender for Endpoint URLs" FontWeight="SemiBold" />
+                                            <CheckBox Content="MDI (Defender for Identity)" IsChecked="{Binding ProxyIncludeMdi}" 
+                                                      ToolTip="Include Microsoft Defender for Identity URLs" FontWeight="SemiBold" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <Separator Margin="0,10" />
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="⚙️ Generate Script" Command="{Binding GenerateProxyScriptCommand}" 
+                                                MinWidth="140" Height="30" Margin="0,0,10,0"
+                                                Background="#FF9C27B0" Foreground="White" FontWeight="SemiBold"
+                                                ToolTip="Generate the Squid proxy setup script" />
+                                        <Button Content="📋 Copy to Clipboard" Command="{Binding CopyProxyScriptCommand}" 
+                                                MinWidth="140" Height="30" Margin="0,0,10,0"
+                                                Background="#FF2196F3" Foreground="White"
+                                                ToolTip="Copy generated script to clipboard" />
+                                        <Button Content="💾 Save Script" Command="{Binding SaveProxyScriptCommand}" 
+                                                MinWidth="120" Height="30"
+                                                Background="#FF4CAF50" Foreground="White"
+                                                ToolTip="Save generated script to file" />
+                                    </StackPanel>
+
+                                    <TextBox Text="{Binding ProxyGeneratedScript, Mode=OneWay}" 
+                                             IsReadOnly="True" TextWrapping="NoWrap" 
+                                             MaxHeight="200"
+                                             VerticalScrollBarVisibility="Auto"
+                                             HorizontalScrollBarVisibility="Auto"
+                                             FontFamily="Consolas" FontSize="11"
+                                             Background="{DynamicResource ControlBackgroundBrush}" Foreground="{DynamicResource WindowForegroundBrush}"
+                                             Margin="0,10,0,0" />
+
+                                    <TextBlock Text="💡 Run this script on an Ubuntu server with internet access. Clients will use this as a proxy for MDE/MDI traffic only." 
+                                               Foreground="CornflowerBlue" Margin="0,10,0,0" TextWrapping="Wrap" FontStyle="Italic" />
+                                </StackPanel>
+                            </GroupBox>
+
+                            <!-- Deployment Results -->
+                            <GroupBox Header="📋 Deployment Results">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" MinHeight="150" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <DataGrid ItemsSource="{Binding DeploymentResults}" 
+                                              AutoGenerateColumns="False" IsReadOnly="True"
+                                              MaxHeight="300">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="Result" Binding="{Binding Success}" Width="60">
+                                                <DataGridTextColumn.ElementStyle>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <Trigger Property="Text" Value="True">
+                                                                <Setter Property="Text" Value="✓" />
+                                                                <Setter Property="Foreground" Value="Green" />
+                                                                <Setter Property="FontWeight" Value="Bold" />
+                                                                <Setter Property="HorizontalAlignment" Value="Center" />
+                                                            </Trigger>
+                                                            <Trigger Property="Text" Value="False">
+                                                                <Setter Property="Text" Value="✗" />
+                                                                <Setter Property="Foreground" Value="Red" />
+                                                                <Setter Property="FontWeight" Value="Bold" />
+                                                                <Setter Property="HorizontalAlignment" Value="Center" />
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </DataGridTextColumn.ElementStyle>
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Header="Type" Binding="{Binding ObjectType}" Width="60" />
+                                            <DataGridTextColumn Header="Name" Binding="{Binding ObjectName}" Width="180" />
+                                            <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="*" />
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+
+                                    <Button Grid.Row="1" Content="Clear Results" Command="{Binding ClearDeploymentResultsCommand}" 
+                                            MinWidth="180" Height="25" Margin="5" HorizontalAlignment="Right" />
+                                </Grid>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Preview Panel -->
+                    <GroupBox Grid.Column="1" Header="👁️ Deployment Preview" Margin="10,0,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Button Content="🔄 Generate Preview" Command="{Binding PreviewDeploymentCommand}" 
+                                    MinWidth="190" Height="30" Margin="5" HorizontalAlignment="Left" />
+
+                            <TextBox Grid.Row="1" Text="{Binding DeploymentPreview, Mode=OneWay}" 
+                                     IsReadOnly="True" TextWrapping="Wrap" 
+                                     VerticalScrollBarVisibility="Auto"
+                                     FontFamily="Consolas" FontSize="11"
+                                     Background="{DynamicResource ControlBackgroundBrush}" Foreground="{DynamicResource WindowForegroundBrush}"
+                                     Margin="5" />
+                        </Grid>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+
+            <!-- Entra ID (Azure AD) Tab - PLATYPUS Azure Analysis -->
+            <TabItem Header="☁️ Entra ID">
+                <Grid Margin="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Connection Panel -->
+                    <GroupBox Grid.Row="0" Header="🔐 Entra ID Connection" Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="300" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="Tenant ID:" VerticalAlignment="Center" Margin="5" />
+                            <TextBox Grid.Column="1" Text="{Binding EntraTenantId, UpdateSourceTrigger=PropertyChanged}" 
+                                     Margin="5" ToolTip="Enter your Azure AD / Entra ID tenant ID or domain (e.g., contoso.onmicrosoft.com)" />
+
+                            <Button Grid.Column="2" Content="🔗 Connect" Command="{Binding ConnectEntraIdCommand}" 
+                                    MinWidth="120" Margin="5" Background="#FF2196F3" Foreground="White" />
+                            <Button Grid.Column="3" Content="🔓 Disconnect" Command="{Binding DisconnectEntraIdCommand}" 
+                                    MinWidth="120" Margin="5" Background="#FFF44336" Foreground="White" />
+
+                            <CheckBox Grid.Column="4" Content="Users Only" IsChecked="{Binding EntraUsersOnly}" 
+                                      VerticalAlignment="Center" Margin="15,5,5,5" 
+                                      ToolTip="Filter privileged roles to show only user accounts (excludes service principals and groups)" />
+
+                            <!-- Connection Status -->
+                            <StackPanel Grid.Row="1" Grid.ColumnSpan="6" Orientation="Horizontal" Margin="5">
+                                <TextBlock Text="Status: " FontWeight="SemiBold" />
+                                <TextBlock>
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="Not connected" />
+                                            <Setter Property="Foreground" Value="#888" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsEntraConnected}" Value="True">
+                                                    <Setter Property="Text" Value="Connected" />
+                                                    <Setter Property="Foreground" Value="#4CAF50" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Text=" | Tenant: " FontWeight="SemiBold" Margin="20,0,0,0" />
+                                <TextBlock Text="{Binding EntraTenant.DisplayName, FallbackValue='-'}" />
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+
+                    <!-- Analysis Buttons -->
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,8">
+                        <Button Content="▶️ Run Full Analysis" Command="{Binding RunEntraAnalysisCommand}" 
+                                MinWidth="160" Margin="5" Background="#FF4CAF50" Foreground="White" FontWeight="SemiBold" />
+                        <Button Content="👥 Privileged Roles" Command="{Binding GetEntraPrivilegedRolesCommand}" 
+                                MinWidth="140" Margin="5" Background="#FF9C27B0" Foreground="White" />
+                        <Button Content="⚠️ Risky Apps" Command="{Binding GetEntraRiskyAppsCommand}" 
+                                MinWidth="120" Margin="5" Background="#FFFF9800" Foreground="White" />
+                        <Button Content="🛡️ CA Policies" Command="{Binding GetEntraCaPoliciesCommand}" 
+                                MinWidth="120" Margin="5" Background="#FF2196F3" Foreground="White" />
+                        <Button Content="🧩 PIM Violations" Command="{Binding GetEntraPimViolationsCommand}"
+                            MinWidth="130" Margin="5" Background="#FFE53935" Foreground="White" />
+
+                        <!-- Counts -->
+                        <Border Margin="20,5,5,5" Padding="10,2" Background="#333" CornerRadius="3">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Priv Users: " Foreground="{DynamicResource WindowForegroundBrush}" />
+                                <TextBlock Text="{Binding EntraPrivilegedUserCount}" Foreground="#4CAF50" FontWeight="Bold" />
+                                <TextBlock Text=" | Risky Apps: " Foreground="{DynamicResource WindowForegroundBrush}" Margin="15,0,0,0" />
+                                <TextBlock Text="{Binding EntraRiskyAppCount}" Foreground="#FF9800" FontWeight="Bold" />
+                                <TextBlock Text=" | CA Policies: " Foreground="{DynamicResource WindowForegroundBrush}" Margin="15,0,0,0" />
+                                <TextBlock Text="{Binding EntraCaPolicyCount}" Foreground="#2196F3" FontWeight="Bold" />
+                                <TextBlock Text=" | PIM Violations: " Foreground="{DynamicResource WindowForegroundBrush}" Margin="15,0,0,0" />
+                                <TextBlock Text="{Binding EntraPimViolationCount}" Foreground="#FF5252" FontWeight="Bold" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Results Tabs -->
+                    <TabControl Grid.Row="2">
+                        <!-- Privileged Roles -->
+                        <TabItem Header="👥 Privileged Roles">
+                            <DataGrid ItemsSource="{Binding EntraPrivilegedRoles}" AutoGenerateColumns="False" 
+                                      IsReadOnly="True" CanUserResizeRows="False" GridLinesVisibility="Horizontal"
+                                      AlternatingRowBackground="{DynamicResource ControlBackgroundBrush}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Role Name" Binding="{Binding RoleName}" Width="200" />
+                                    <DataGridTextColumn Header="Role ID" Binding="{Binding RoleId}" Width="280" />
+                                    <DataGridTextColumn Header="Members" Binding="{Binding Members.Count}" Width="80" />
+                                    <DataGridTemplateColumn Header="Member Details" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ItemsControl ItemsSource="{Binding Members}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock>
+                                                                <Run Text="{Binding DisplayName, Mode=OneWay}" FontWeight="SemiBold" />
+                                                                <Run Text=" (" /><Run Text="{Binding ObjectType, Mode=OneWay}" /><Run Text=")" />
+                                                                <Run Text=" - " /><Run Text="{Binding AssignmentType, Mode=OneWay}" Foreground="#888" />
+                                                            </TextBlock>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+
+                        <!-- Risky Apps -->
+                        <TabItem Header="⚠️ Risky Apps">
+                            <DataGrid ItemsSource="{Binding EntraRiskyApps}" AutoGenerateColumns="False" 
+                                      IsReadOnly="True" CanUserResizeRows="False" GridLinesVisibility="Horizontal"
+                                      AlternatingRowBackground="{DynamicResource ControlBackgroundBrush}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="80">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Severity}" Value="Critical">
+                                                        <Setter Property="Foreground" Value="#FF5252" />
+                                                        <Setter Property="FontWeight" Value="Bold" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Severity}" Value="High">
+                                                        <Setter Property="Foreground" Value="#FF9800" />
+                                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="App Name" Binding="{Binding DisplayName}" Width="200" />
+                                    <DataGridTextColumn Header="App ID" Binding="{Binding AppId}" Width="280" />
+                                    <DataGridTextColumn Header="Risky Permissions" Binding="{Binding RiskyPermissionCount}" Width="120" />
+                                    <DataGridTemplateColumn Header="Permission Details" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ItemsControl ItemsSource="{Binding RiskyPermissions}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock TextWrapping="Wrap">
+                                                                <Run Text="{Binding PermissionName, Mode=OneWay}" FontWeight="SemiBold" Foreground="#FF9800" />
+                                                                <Run Text=" - " /><Run Text="{Binding PermissionDescription, Mode=OneWay}" Foreground="#888" />
+                                                            </TextBlock>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+
+                        <!-- Conditional Access Policies -->
+                        <TabItem Header="🛡️ CA Policies">
+                            <DataGrid ItemsSource="{Binding EntraConditionalAccessPolicies}" AutoGenerateColumns="False" 
+                                      IsReadOnly="True" CanUserResizeRows="False" GridLinesVisibility="Horizontal"
+                                      AlternatingRowBackground="{DynamicResource ControlBackgroundBrush}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="State" Binding="{Binding State}" Width="100">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding State}" Value="enabled">
+                                                        <Setter Property="Foreground" Value="#4CAF50" />
+                                                        <Setter Property="FontWeight" Value="Bold" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding State}" Value="disabled">
+                                                        <Setter Property="Foreground" Value="#888" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding State}" Value="enabledForReportingButNotEnforced">
+                                                        <Setter Property="Foreground" Value="#2196F3" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Policy Name" Binding="{Binding DisplayName}" Width="250" />
+                                    <DataGridTextColumn Header="Policy ID" Binding="{Binding PolicyId}" Width="280" />
+                                    <DataGridTextColumn Header="Targets Users" Binding="{Binding IncludesAllUsers}" Width="100" />
+                                    <DataGridTextColumn Header="Targets Apps" Binding="{Binding IncludesAllApps}" Width="100" />
+                                    <DataGridTextColumn Header="Grant Controls" Binding="{Binding GrantControlsSummary}" Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+
+                        <!-- PIM Violations -->
+                        <TabItem Header="🧩 PIM Violations">
+                            <DataGrid ItemsSource="{Binding EntraPimViolations}" AutoGenerateColumns="False"
+                                      IsReadOnly="True" CanUserResizeRows="False" GridLinesVisibility="Horizontal"
+                                      AlternatingRowBackground="{DynamicResource ControlBackgroundBrush}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Severity" Binding="{Binding ViolationType}" Width="90">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ViolationType}" Value="Critical">
+                                                        <Setter Property="Foreground" Value="#FF5252" />
+                                                        <Setter Property="FontWeight" Value="Bold" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ViolationType}" Value="Warning">
+                                                        <Setter Property="Foreground" Value="#FF9800" />
+                                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Role" Binding="{Binding RoleName}" Width="220" />
+                                    <DataGridTextColumn Header="Principal" Binding="{Binding PrincipalDisplayName}" Width="220" />
+                                    <DataGridTextColumn Header="Type" Binding="{Binding PrincipalType}" Width="120" />
+                                    <DataGridTextColumn Header="UPN/App" Binding="{Binding PrincipalUpn}" Width="250" />
+                                    <DataGridTextColumn Header="Assignment" Binding="{Binding AssignmentType}" Width="100" />
+                                    <DataGridTextColumn Header="Recommendation" Binding="{Binding Recommendation}" Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+
+                        <!-- PIM Assignment Management -->
+                        <TabItem Header="🧰 PIM Management">
+                            <Grid Margin="5">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <GroupBox Grid.Row="0" Header="Create Eligible PIM Assignment" Margin="0,0,0,8">
+                                    <Grid Margin="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="220" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="220" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="120" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Column="0" Text="User UPN:" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                        <TextBox Grid.Column="1" Text="{Binding PimNewPrincipalUpn, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
+
+                                        <TextBlock Grid.Column="2" Text="Role Name:" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                        <TextBox Grid.Column="3" Text="{Binding PimNewRoleName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
+
+                                        <TextBlock Grid.Column="4" Text="Days:" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                        <TextBox Grid.Column="5" Text="{Binding PimNewDurationDays, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
+
+                                        <StackPanel Grid.Column="6" Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Content="Refresh Assignments" Command="{Binding GetPimAssignmentsCommand}" MinWidth="140" Margin="0,0,8,0" Background="#FF2196F3" Foreground="White" />
+                                            <Button Content="Create Eligible Assignment" Command="{Binding CreatePimAssignmentCommand}" MinWidth="180" Background="#FF4CAF50" Foreground="White" FontWeight="SemiBold" />
+                                        </StackPanel>
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Justification:" VerticalAlignment="Center" Margin="0,8,6,0" />
+                                        <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="6" Text="{Binding PimNewJustification, UpdateSourceTrigger=PropertyChanged}" Margin="0,8,0,0" />
+                                    </Grid>
+                                </GroupBox>
+
+                                <DataGrid Grid.Row="1" ItemsSource="{Binding EntraPimAssignments}" AutoGenerateColumns="False" IsReadOnly="True"
+                                          CanUserResizeRows="False" GridLinesVisibility="Horizontal" AlternatingRowBackground="{DynamicResource ControlBackgroundBrush}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Type" Binding="{Binding AssignmentType}" Width="90" />
+                                        <DataGridTextColumn Header="Role" Binding="{Binding RoleName}" Width="240" />
+                                        <DataGridTextColumn Header="Principal" Binding="{Binding PrincipalDisplayName}" Width="220" />
+                                        <DataGridTextColumn Header="UPN/App" Binding="{Binding PrincipalUpn}" Width="220" />
+                                        <DataGridTextColumn Header="Principal Type" Binding="{Binding PrincipalType}" Width="120" />
+                                        <DataGridTextColumn Header="Start" Binding="{Binding StartDateTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="140" />
+                                        <DataGridTextColumn Header="End" Binding="{Binding EndDateTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="140" />
+                                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+                        </TabItem>
+
+                        <!-- App Registration -->
+                        <TabItem Header="🧾 App Registration">
+                            <Grid Margin="8">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+                                    <TextBlock Text="App Name:" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                    <TextBox Width="360" Text="{Binding AppRegistrationName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
+                                    <Button Content="Create / Get App Registration" Command="{Binding CreateAppRegistrationCommand}" MinWidth="220" Background="#FF673AB7" Foreground="White" FontWeight="SemiBold" />
+                                </StackPanel>
+
+                                <TextBox Grid.Row="1" Text="{Binding AppRegistrationResultText}" IsReadOnly="True" TextWrapping="Wrap"
+                                         VerticalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="12"
+                                         Background="{DynamicResource ControlBackgroundBrush}" Foreground="{DynamicResource WindowForegroundBrush}" />
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+            </TabItem>
+
+            <!-- Log Tab -->
+            <TabItem Header="📝 Log">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <ListBox ItemsSource="{Binding LogMessages}" 
+                             FontFamily="Consolas" FontSize="11"
+                             Background="{DynamicResource ControlBackgroundBrush}">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Foreground" Value="{DynamicResource WindowForegroundBrush}" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Foreground="{DynamicResource WindowForegroundBrush}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <Button Grid.Row="1" Content="Clear Log" Command="{Binding ClearLogCommand}" 
+                            HorizontalAlignment="Right" Margin="5" MinWidth="180" />
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="3" Background="{DynamicResource ControlBackgroundBrush}" Padding="8,4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="{Binding Status}" VerticalAlignment="Center" />
+
+                <ProgressBar Grid.Column="1" Width="200" Height="16" 
+                             Value="{Binding Progress}" 
+                             IsIndeterminate="{Binding IsIndeterminate}"
+                             Visibility="{Binding IsAnalyzing, Converter={StaticResource BoolToVisibilityConverter}}" />
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

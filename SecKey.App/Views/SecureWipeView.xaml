@@ -1,0 +1,185 @@
+<UserControl x:Class="SecKey.App.Views.SecureWipeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignHeight="700" d:DesignWidth="1000">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="{DynamicResource ErrorBackgroundBrush}" BorderBrush="#FFAAAA" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock FontSize="18" FontWeight="Bold" Foreground="#CC0000">
+                    🔥 Secure Data Wipe
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" Margin="0,8,0,0" Foreground="#880000">
+                    ⚠️ WARNING: This tool permanently and irreversibly destroys data using forensically sound methods.
+                    Files wiped with this tool CANNOT be recovered by any data recovery software or forensic analysis.
+                    Use with extreme caution.
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- Target Selection -->
+        <GroupBox Header="📁 Target Selection" Grid.Row="1" Margin="0,0,0,12">
+            <Grid Margin="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="0,0,8,0">Target Path:</TextBlock>
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding TargetPath, UpdateSourceTrigger=PropertyChanged}" 
+                         VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <Button Grid.Row="0" Grid.Column="2" Content="📄 File..." Command="{Binding BrowseFileCommand}" 
+                        MinWidth="180" Margin="0,0,4,0"/>
+                <Button Grid.Row="0" Grid.Column="3" Content="📁 Folder..." Command="{Binding BrowseFolderCommand}" 
+                        MinWidth="180"/>
+
+                <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding TargetInfo}" 
+                           Margin="0,8,0,0" FontStyle="Italic" Foreground="{DynamicResource SecondaryTextBrush}"/>
+            </Grid>
+        </GroupBox>
+
+        <!-- Wipe Level Selection -->
+        <GroupBox Header="🔒 Wipe Level" Grid.Row="2" Margin="0,0,0,12">
+            <Grid Margin="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <ComboBox Grid.Row="0" Grid.Column="0" ItemsSource="{Binding WipeLevels}" 
+                          SelectedItem="{Binding SelectedWipeLevel}" Margin="0,0,8,0">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Icon}" Width="24"/>
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                <TextBlock Text=" - " Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding PassCount, StringFormat='{}{0} passes'}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" 
+                            Visibility="{Binding IsCustomPasses, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock VerticalAlignment="Center" Margin="8,0,4,0">Passes:</TextBlock>
+                    <TextBox Text="{Binding CustomPassCount, UpdateSourceTrigger=PropertyChanged}" 
+                             Width="50" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                           Text="{Binding SelectedWipeLevel.Description}" 
+                           TextWrapping="Wrap" Margin="0,8,0,0" FontStyle="Italic"/>
+            </Grid>
+        </GroupBox>
+
+        <!-- Options -->
+        <GroupBox Header="⚙️ Options" Grid.Row="3" Margin="0,0,0,12">
+            <WrapPanel Margin="8" Orientation="Horizontal">
+                <CheckBox Content="Confirm before wipe" IsChecked="{Binding ConfirmBeforeWipe}" Margin="0,0,20,4"/>
+                <CheckBox Content="Rename files before deletion" IsChecked="{Binding RenameBeforeDelete}" Margin="0,0,20,4"/>
+                <CheckBox Content="Wipe free space after" IsChecked="{Binding WipeFreeSpaceAfter}" Margin="0,0,20,4"/>
+            </WrapPanel>
+        </GroupBox>
+
+        <!-- Wipe Log -->
+        <GroupBox Header="📋 Wipe Log" Grid.Row="4" Margin="0,0,0,12">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <ListBox Grid.Row="0" ItemsSource="{Binding WipeLog}" 
+                         FontFamily="Consolas" FontSize="11"
+                         VirtualizingStackPanel.IsVirtualizing="True"
+                         VirtualizingStackPanel.VirtualizationMode="Recycling"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding}" Value="">
+                                                <Setter Property="Foreground" Value="Gray"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Button Grid.Row="1" Content="Clear Log" Command="{Binding ClearLogCommand}" 
+                        HorizontalAlignment="Right" Margin="0,8,0,0" MinWidth="180"/>
+            </Grid>
+        </GroupBox>
+
+        <!-- Status and Actions -->
+        <Grid Grid.Row="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Progress -->
+            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                <TextBlock Text="{Binding StatusMessage}" Margin="0,0,0,4"/>
+                <ProgressBar Height="20" Value="{Binding Progress}" Maximum="100" 
+                             Visibility="{Binding IsWiping, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <TextBlock Text="{Binding CurrentOperation}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"
+                           Visibility="{Binding IsWiping, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            </StackPanel>
+
+            <!-- Action Buttons -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <ComboBox ItemsSource="{Binding AvailableDrives}" SelectedItem="{Binding SelectedDrive}"
+                          DisplayMemberPath="Name" Width="60" Margin="0,0,4,0"/>
+                <Button Content="🧹 Wipe Free Space" Command="{Binding WipeFreeSpaceCommand}" 
+                        MinWidth="190" Margin="0,0,8,0"
+                        Background="#FFFF9800" Foreground="White"/>
+                <Button Content="❌ Cancel" Command="{Binding CancelCommand}" 
+                        MinWidth="180" Margin="0,0,8,0"
+                        Background="#FF9E9E9E" Foreground="White"
+                        Visibility="{Binding IsWiping, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <Button Content="🔥 WIPE NOW" Command="{Binding WipeCommand}" 
+                        MinWidth="190" FontWeight="Bold"
+                        Background="#FFF44336" Foreground="White">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsWiping}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

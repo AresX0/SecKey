@@ -1,0 +1,109 @@
+<UserControl x:Class="SecKey.App.Views.CertificateManagerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignHeight="700" d:DesignWidth="1200">
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="5" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="🔐 Certificate Manager" FontSize="16" FontWeight="Bold" Margin="0,0,0,8" />
+
+        <!-- Controls -->
+        <GroupBox Grid.Row="1" Header="Filters" Margin="0,0,0,4">
+            <WrapPanel Margin="8">
+                <TextBlock Text="Store:" VerticalAlignment="Center" Margin="0,0,4,0" />
+                <ComboBox ItemsSource="{Binding StoreLocations}" SelectedItem="{Binding SelectedStoreLocation}"
+                          Width="160" Margin="0,0,12,0" />
+                <TextBlock Text="Search:" VerticalAlignment="Center" Margin="0,0,4,0" />
+                <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged, Delay=300}"
+                         Width="200" Margin="0,0,12,0" />
+                <CheckBox Content="Expired Only" IsChecked="{Binding ShowExpiredOnly}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                <CheckBox Content="Expiring (≤30d)" IsChecked="{Binding ShowExpiringOnly}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                <Button Content="🔄 Refresh" Command="{Binding RefreshCommand}" Padding="12,4"
+                        Background="#FF2196F3" Foreground="White" />
+            </WrapPanel>
+        </GroupBox>
+
+        <GridSplitter Grid.Row="2" Height="5" HorizontalAlignment="Stretch"
+                      Background="#CCCCCC" Cursor="SizeNS" ResizeDirection="Rows"/>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="350" MinWidth="300" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Certificate List -->
+            <DataGrid Grid.Column="0" ItemsSource="{Binding Certificates}" SelectedItem="{Binding SelectedCertificate}"
+                      AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single"
+                      GridLinesVisibility="Horizontal" AlternatingRowBackground="{DynamicResource ControlBackgroundBrush}"
+                      Background="{DynamicResource ControlBackgroundBrush}" Foreground="{DynamicResource WindowForegroundBrush}" BorderThickness="0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="" Binding="{Binding StatusIcon}" Width="35" />
+                    <DataGridTextColumn Header="Subject" Binding="{Binding SubjectShort}" Width="*" MinWidth="200">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                <Setter Property="ToolTip" Value="{Binding Subject}" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Issuer" Binding="{Binding Issuer}" Width="180">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                <Setter Property="ToolTip" Value="{Binding Issuer}" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Expires" Binding="{Binding NotAfter, StringFormat='yyyy-MM-dd'}" Width="90" />
+                    <DataGridTextColumn Header="Status" Binding="{Binding StatusText}" Width="85" />
+                    <DataGridTextColumn Header="Store" Binding="{Binding StoreName}" Width="60" />
+                    <DataGridCheckBoxColumn Header="🔑" Binding="{Binding HasPrivateKey}" Width="35" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center"
+                          Background="#CCCCCC" Cursor="SizeWE" />
+
+            <!-- Details Panel -->
+            <Grid Grid.Column="2" Margin="4,0,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <GroupBox Header="Certificate Details">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <TextBox Text="{Binding CertDetails, Mode=OneWay}" IsReadOnly="True"
+                                 FontFamily="Consolas" FontSize="11"
+                                 Background="Transparent" Foreground="{DynamicResource WindowForegroundBrush}"
+                                 BorderThickness="0" TextWrapping="Wrap" />
+                    </ScrollViewer>
+                </GroupBox>
+
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,4,0,0">
+                    <Button Content="📋 Copy Thumbprint" Command="{Binding CopyThumbprintCommand}" Padding="8,4"
+                            Background="#FF2196F3" Foreground="White" Margin="0,0,4,0" />
+                    <Button Content="📄 Copy Details" Command="{Binding CopyDetailsCommand}" Padding="8,4"
+                            Background="#FF9C27B0" Foreground="White" Margin="0,0,4,0" />
+                    <Button Content="💾 Export" Command="{Binding ExportCommand}" Padding="8,4"
+                            Background="#FF4CAF50" Foreground="White" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <!-- Status Bar -->
+        <TextBlock Grid.Row="4" Text="{Binding StatusMessage}" Margin="0,4,0,0"
+                   Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" />
+    </Grid>
+</UserControl>

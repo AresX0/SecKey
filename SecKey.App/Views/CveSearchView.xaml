@@ -1,0 +1,53 @@
+<UserControl x:Class="SecKey.App.Views.CveSearchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="CVE Search" FontSize="20" FontWeight="Bold" Margin="0,0,0,8"/>
+
+        <Grid Grid.Row="1" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+            <Button Grid.Column="1" Content="Search" Command="{Binding SearchCommand}"/>
+            <Button Grid.Column="2" Content="Open" Command="{Binding OpenSelectedCommand}"/>
+            <Button Grid.Column="3" Content="Copy ID" Command="{Binding CopySelectedIdCommand}"/>
+            <Button Grid.Column="4" Content="Export" Command="{Binding ExportResultsCommand}"/>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <DataGrid Grid.Column="0" ItemsSource="{Binding Results}" SelectedItem="{Binding Selected}" AutoGenerateColumns="False" IsReadOnly="True" Margin="0,0,8,0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="CVE" Binding="{Binding Id}" Width="180"/>
+                    <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="110"/>
+                    <DataGridTextColumn Header="Published" Binding="{Binding PublishedUtc, StringFormat={}{0:yyyy-MM-dd}}" Width="130"/>
+                    <DataGridTextColumn Header="Summary" Binding="{Binding Summary}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Border Grid.Column="1" BorderBrush="{DynamicResource StatusPanelBorderBrush}" BorderThickness="1" Padding="8" Background="{DynamicResource CardBrush}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <TextBlock Text="{Binding SelectedDetails}" TextWrapping="Wrap" FontFamily="Consolas"/>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <TextBlock Grid.Row="3" Text="{Binding StatusMessage}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+    </Grid>
+</UserControl>
