@@ -581,11 +581,14 @@ internal static class DeploymentPageHelpers
         var dir = new DirectoryInfo(Environment.CurrentDirectory);
         while (dir is not null)
         {
-            if (Directory.Exists(Path.Combine(dir.FullName, "JSON")) &&
-                Directory.Exists(Path.Combine(dir.FullName, "source")))
+            if (Directory.Exists(Path.Combine(dir.FullName, "JSON")))
                 return dir.FullName;
             dir = dir.Parent;
         }
+
+        var appBase = AppContext.BaseDirectory;
+        if (Directory.Exists(Path.Combine(appBase, "JSON")))
+            return appBase;
 
         return Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, ".."));
     }

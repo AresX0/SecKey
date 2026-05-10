@@ -7,6 +7,7 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
+$workspaceRoot = Split-Path -Parent $repoRoot
 $publishDir = Join-Path $repoRoot "artifacts\publish\SecKey.App"
 $outDir = Join-Path $repoRoot "artifacts\installer"
 $wixFile = Join-Path $PSScriptRoot "wix\SecKey.Product.wxs"
@@ -65,6 +66,27 @@ New-Item -ItemType Directory -Path $outDir -Force | Out-Null
 
 Write-Host "Publishing SecKey.App..." -ForegroundColor Cyan
 dotnet publish (Join-Path $repoRoot "SecKey.App\SecKey.App.csproj") -c $Configuration -r $Runtime --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o $publishDir
+
+# Stage deployment content into publish output so MSI installs required manifests/assets.
+$contentFolders = @("JSON", "IntuneApps", "RemediationScripts")
+foreach ($folder in $contentFolders) {
+    $src = Join-Path $workspaceRoot $folder
+    if (-not (Test-Path $src)) {
+        $src = Join-Path $repoRoot $folder
+    }
+
+    if (-not (Test-Path $src)) {
+        continue
+    }
+
+    $dst = Join-Path $publishDir $folder
+    if (Test-Path $dst) {
+        Remove-Item -LiteralPath $dst -Recurse -Force
+    }
+
+    Write-Host "Staging content folder: $folder" -ForegroundColor Cyan
+    Copy-Item -Path $src -Destination $dst -Recurse -Force
+}
 
 Write-Host "Ensuring WiX tool is installed..." -ForegroundColor Cyan
 dotnet tool update --global wix --version 4.* | Out-Null

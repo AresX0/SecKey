@@ -219,11 +219,13 @@ static string ResolveRepoRoot(string startDirectory)
     var dir = new DirectoryInfo(startDirectory);
     while (dir is not null)
     {
-        if (Directory.Exists(Path.Combine(dir.FullName, "JSON")) &&
-            Directory.Exists(Path.Combine(dir.FullName, "source")))
+        if (Directory.Exists(Path.Combine(dir.FullName, "JSON")))
             return dir.FullName;
         dir = dir.Parent;
     }
+
+    if (Directory.Exists(Path.Combine(AppContext.BaseDirectory, "JSON")))
+        return AppContext.BaseDirectory;
 
     return Path.GetFullPath(Path.Combine(startDirectory, ".."));
 }

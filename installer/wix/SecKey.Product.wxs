@@ -11,11 +11,7 @@
     <MediaTemplate EmbedCab="yes" />
 
     <StandardDirectory Id="LocalAppDataFolder">
-      <Directory Id="INSTALLFOLDER" Name="SecKey">
-        <Component Id="MainExe" Guid="*">
-          <File Id="SecKeyAppExe" Source="$(var.PublishDir)\SecKey.App.exe" KeyPath="yes" />
-        </Component>
-      </Directory>
+      <Directory Id="INSTALLFOLDER" Name="SecKey" />
     </StandardDirectory>
 
     <StandardDirectory Id="ProgramMenuFolder">
@@ -39,9 +35,13 @@
     </DirectoryRef>
 
     <Feature Id="MainFeature" Title="SecKey" Level="1">
-      <ComponentRef Id="MainExe" />
+      <ComponentGroupRef Id="AppFiles" />
       <ComponentRef Id="StartMenuShortcut" />
     </Feature>
+
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <Files Include="$(var.PublishDir)\**" />
+    </ComponentGroup>
 
   </Package>
 </Wix>
