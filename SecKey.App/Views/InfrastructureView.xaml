@@ -24,7 +24,8 @@
             </DataGrid>
         </Expander>
 
-        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+        <ScrollViewer DockPanel.Dock="Top" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="0,0,0,12">
             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                 <TextBlock Text="Full SecKey Infrastructure Deployment:" VerticalAlignment="Center"/>
                 <Button Content="Apply Full SecKey Environment" Command="{Binding ApplyFullEnvironmentCommand}" Padding="14,6" Margin="8,0,0,0"/>
@@ -121,5 +122,6 @@
                 </DataGrid>
             </Expander>
         </StackPanel>
+        </ScrollViewer>
     </DockPanel>
 </UserControl>

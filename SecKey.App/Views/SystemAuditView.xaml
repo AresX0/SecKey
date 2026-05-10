@@ -14,7 +14,8 @@
             <TextBlock Text="System Audit" FontSize="22" FontWeight="Bold" Foreground="White"/>
         </Border>
 
-        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+        <ScrollViewer DockPanel.Dock="Top" MaxHeight="320" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="0,0,0,8">
             <GroupBox Header="Audit Actions" Margin="0,0,0,8">
                 <WrapPanel Margin="8">
                     <Button Content="Full Audit" Command="{Binding RunFullAuditCommand}" Margin="0,0,8,8"/>
@@ -66,6 +67,7 @@
                 </WrapPanel>
             </GroupBox>
         </StackPanel>
+        </ScrollViewer>
 
         <Border DockPanel.Dock="Bottom" Margin="0,8,0,0" Background="{DynamicResource StatusPanelBrush}" BorderBrush="{DynamicResource StatusPanelBorderBrush}" BorderThickness="1" Padding="8">
             <StackPanel>

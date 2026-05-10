@@ -185,7 +185,7 @@
                     </StackPanel>
                 </Border>
 
-                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" CanContentScroll="True" PanningMode="VerticalFirst">
                     <StackPanel>
                         <Button Content="Sign In / Out" Command="{Binding ShowLoginCommand}" Style="{StaticResource NavButtonStyle}"/>
                         <Button Content="Dashboard" Command="{Binding ShowDashboardCommand}" Style="{StaticResource NavButtonStyle}"/>

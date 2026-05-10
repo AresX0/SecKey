@@ -7,8 +7,9 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="2*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -60,7 +61,7 @@
 
         <ListBox Grid.Row="5" ItemsSource="{Binding FilteredProfiles}" SelectedItem="{Binding SelectedProfile}" Margin="0,0,0,8"/>
 
-        <TextBox Grid.Row="6" Text="{Binding DecodedXml}" IsReadOnly="True" FontFamily="Consolas" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+        <TextBox Grid.Row="6" Text="{Binding DecodedXml}" IsReadOnly="True" FontFamily="Consolas" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" MaxHeight="200"/>
 
         <TextBlock Grid.Row="7" Text="{Binding StatusMessage}" Foreground="{DynamicResource SecondaryTextBrush}"/>
     </Grid>
