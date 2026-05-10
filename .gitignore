@@ -14,9 +14,11 @@ artifacts/
 *.nupkg
 packages/
 
-# Legacy archived content only
+# Local docs/instructions and archived content (non-runtime)
 archive/
 archive/**
+docs/
+docs/**
 
 # Allow project PowerShell scripts (e.g., installer tooling)
 !installer/*.ps1

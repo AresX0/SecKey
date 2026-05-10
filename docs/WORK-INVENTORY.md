@@ -68,3 +68,17 @@ Consolidate all active/uncommitted platform work into one deployable, documented
 - Add integration tests for JSON live edit -> deploy pipeline.
 - Address vulnerable package warnings with controlled upgrade plan.
 - Add module-level docs for each new security tool workflow.
+
+## Authoritative Open Items
+This section is the single release-readiness source of truth for remaining work.
+
+1. Complete runtime click-through validation for all security/intune module pages still marked PASS-STATIC or PENDING-RUNTIME in parity tracking.
+2. Implement non-placeholder Export Settings and Import Settings menu workflows.
+3. Add targeted smoke tests for newly added modules.
+4. Add integration tests for JSON live edit -> deploy pipeline.
+5. Address vulnerable/compatibility package warnings with a controlled upgrade plan.
+6. Expand module-level docs for each new security workflow.
+
+## Tracking Notes
+- Use this file for open/unfinished work status.
+- Other docs (README, deliverables, parity checklists) provide context and should not be treated as authoritative for release readiness.
