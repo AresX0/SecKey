@@ -351,18 +351,25 @@ public sealed partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void OpenLogs()
     {
-        string logDir = System.IO.Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "SecKey", "Logs");
-        
-        if (System.IO.Directory.Exists(logDir))
+        var candidates = new[]
         {
-            Process.Start(new ProcessStartInfo { FileName = logDir, UseShellExecute = true });
-        }
-        else
+            Path.Combine(EntraConfigService.DataDirectory, "Logs"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft", "SecKey"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SecKey", "Logs")
+        };
+
+        foreach (var candidate in candidates)
         {
-            System.Windows.MessageBox.Show("Logs directory not found: " + logDir, "SecKey - Error");
+            if (Directory.Exists(candidate))
+            {
+                Process.Start(new ProcessStartInfo { FileName = candidate, UseShellExecute = true });
+                return;
+            }
         }
+
+        var defaultLogDir = candidates[0];
+        Directory.CreateDirectory(defaultLogDir);
+        Process.Start(new ProcessStartInfo { FileName = defaultLogDir, UseShellExecute = true });
     }
 
     [RelayCommand]
