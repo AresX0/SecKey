@@ -15,15 +15,18 @@ public sealed partial class MainViewModel : ObservableObject
 {
     private readonly IServiceProvider _sp;
     private readonly AuthState _auth;
+    private readonly AppUpdateService _updateService;
+    private bool _isUpdateCheckInProgress;
 
     [ObservableProperty] private object? _currentView;
     [ObservableProperty] private bool _isDarkMode = false;
     public string AuthStatus => _auth.StatusMessage ?? "Not signed in";
 
-    public MainViewModel(IServiceProvider sp, AuthState auth)
+    public MainViewModel(IServiceProvider sp, AuthState auth, AppUpdateService updateService)
     {
         _sp = sp;
         _auth = auth;
+        _updateService = updateService;
         _auth.PropertyChanged += (_, __) => OnPropertyChanged(nameof(AuthStatus));
         if (_auth.IsSignedIn)
             ShowDashboard();
@@ -222,40 +225,87 @@ public sealed partial class MainViewModel : ObservableObject
 
     // Help Menu Commands
     [RelayCommand]
+    private async Task CheckForUpdatesAsync()
+    {
+        if (_isUpdateCheckInProgress)
+            return;
+
+        _isUpdateCheckInProgress = true;
+        try
+        {
+            var check = await _updateService.CheckForUpdateAsync();
+            if (!check.IsUpdateAvailable || check.Release is null)
+            {
+                MessageBox.Show(check.Message, "SecKey Updates", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var release = check.Release;
+            var prompt =
+                $"A new version is available.\n\n" +
+                $"Current: {check.CurrentVersion}\n" +
+                $"Latest:  {release.Version} ({release.Tag})\n\n" +
+                "Do you want to download and install this update now?";
+
+            var yes = MessageBox.Show(prompt, "SecKey Updates", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (yes != MessageBoxResult.Yes)
+                return;
+
+            var install = await _updateService.StartUpdateAsync(release);
+            if (!install.Started)
+            {
+                var openRelease = MessageBox.Show(
+                    install.Message + "\n\nOpen release page?",
+                    "SecKey Updates",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (openRelease == MessageBoxResult.Yes && !string.IsNullOrWhiteSpace(release.HtmlUrl))
+                {
+                    Process.Start(new ProcessStartInfo { FileName = release.HtmlUrl, UseShellExecute = true });
+                }
+
+                return;
+            }
+
+            MessageBox.Show(install.Message, "SecKey Updates", MessageBoxButton.OK, MessageBoxImage.Information);
+            Application.Current.Shutdown();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Update check failed: {ex.Message}", "SecKey Updates", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            _isUpdateCheckInProgress = false;
+        }
+    }
+
+    [RelayCommand]
     private void OpenHelp()
     {
-        string helpFile = "SecKey-Help.html";
-        string helpPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", helpFile);
-        if (!System.IO.File.Exists(helpPath))
-        {
-            helpPath = System.IO.Path.Combine("C:", "Projects", "SecureKeyboard", "SecKey-Help.html");
-        }
-        if (System.IO.File.Exists(helpPath))
+        var helpPath = ResolveDocPath("SecKey-Help.html");
+        if (helpPath is not null)
         {
             Process.Start(new ProcessStartInfo { FileName = helpPath, UseShellExecute = true });
         }
         else
         {
-            System.Windows.MessageBox.Show("Help file not found: " + helpPath, "SecKey - Error");
+            MessageBox.Show("Help file not found.", "SecKey - Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
     [RelayCommand]
     private void OpenSkipReasons()
     {
-        string skipFile = "DEPLOYMENT-SKIP-REASONS.md";
-        string skipPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", skipFile);
-        if (!System.IO.File.Exists(skipPath))
-        {
-            skipPath = System.IO.Path.Combine("C:", "Projects", "SecureKeyboard", "DEPLOYMENT-SKIP-REASONS.md");
-        }
-        if (System.IO.File.Exists(skipPath))
+        var skipPath = ResolveDocPath("DEPLOYMENT-SKIP-REASONS.md");
+        if (skipPath is not null)
         {
             Process.Start(new ProcessStartInfo { FileName = skipPath, UseShellExecute = true });
         }
         else
         {
-            System.Windows.MessageBox.Show("Skip reasons file not found: " + skipPath, "SecKey - Error");
+            MessageBox.Show("Skip reasons file not found.", "SecKey - Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -342,5 +392,29 @@ public sealed partial class MainViewModel : ObservableObject
             default:
                 return false;
         }
+    }
+
+    private static string? ResolveDocPath(string fileName)
+    {
+        var candidates = new[]
+        {
+            Path.Combine(AppContext.BaseDirectory, fileName),
+            Path.Combine(AppContext.BaseDirectory, "docs", fileName),
+            Path.Combine(AppContext.BaseDirectory, "..", "..", fileName),
+            Path.Combine(AppContext.BaseDirectory, "..", "..", "docs", fileName),
+            Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", fileName),
+            Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "docs", fileName),
+            Path.Combine("C:", "Projects", "SecureKeyboard", fileName),
+            Path.Combine("C:", "Projects", "SecureKeyboard", "source", "docs", fileName)
+        };
+
+        foreach (var candidate in candidates)
+        {
+            var full = Path.GetFullPath(candidate);
+            if (File.Exists(full))
+                return full;
+        }
+
+        return null;
     }
 }

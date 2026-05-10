@@ -78,6 +78,7 @@ public partial class App : Application
         services.AddTransient<ISystemAuditService, SystemAuditService>();
         services.AddSingleton<INativeDeploymentSettingsService, NativeDeploymentSettingsService>();
         services.AddSingleton<AppSettingsExchangeService>();
+        services.AddSingleton<AppUpdateService>();
 
         services.AddSingleton<EntraConfigService>(_ => EntraConfigService.Instance);
         services.AddSingleton<AuthState>();

@@ -144,6 +144,8 @@
                     <MenuItem Header="_Dark Mode" IsCheckable="True" IsChecked="{Binding IsDarkMode, Mode=TwoWay}" Command="{Binding ToggleDarkModeCommand}"/>
             </MenuItem>
             <MenuItem Header="_Help">
+                <MenuItem Header="_Check for Updates" Command="{Binding CheckForUpdatesCommand}"/>
+                <Separator/>
                 <MenuItem Header="_Open Help File" Command="{Binding OpenHelpCommand}"/>
                 <MenuItem Header="_Skip Reasons Reference" Command="{Binding OpenSkipReasonsCommand}"/>
                 <MenuItem Header="_About SecKey" Command="{Binding OpenAboutCommand}"/>
