@@ -6,7 +6,6 @@ using SecKey.App.Services;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Text.Json;
 using System.Windows;
 using System.Windows.Media;
 
@@ -20,14 +19,6 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty] private object? _currentView;
     [ObservableProperty] private bool _isDarkMode = false;
     public string AuthStatus => _auth.StatusMessage ?? "Not signed in";
-
-    private sealed class AppSettingsExport
-    {
-        public bool IsDarkMode { get; set; }
-        public EntraConfig EntraConfig { get; set; } = new();
-        public DateTime ExportedAtUtc { get; set; }
-        public string Version { get; set; } = "1.0";
-    }
 
     public MainViewModel(IServiceProvider sp, AuthState auth)
     {
@@ -103,15 +94,8 @@ public sealed partial class MainViewModel : ObservableObject
             if (dialog.ShowDialog() != true)
                 return;
 
-            var export = new AppSettingsExport
-            {
-                IsDarkMode = IsDarkMode,
-                EntraConfig = EntraConfigService.Instance.Load(),
-                ExportedAtUtc = DateTime.UtcNow
-            };
-
-            var json = JsonSerializer.Serialize(export, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(dialog.FileName, json);
+            var exchange = _sp.GetRequiredService<AppSettingsExchangeService>();
+            exchange.ExportToFile(dialog.FileName, IsDarkMode);
 
             MessageBox.Show($"Settings exported to:\n{dialog.FileName}", "SecKey", MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -135,15 +119,8 @@ public sealed partial class MainViewModel : ObservableObject
             if (dialog.ShowDialog() != true)
                 return;
 
-            var json = File.ReadAllText(dialog.FileName);
-            var imported = JsonSerializer.Deserialize<AppSettingsExport>(json);
-            if (imported == null)
-            {
-                MessageBox.Show("Invalid settings file.", "SecKey", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            EntraConfigService.Instance.Save(imported.EntraConfig ?? new EntraConfig());
+            var exchange = _sp.GetRequiredService<AppSettingsExchangeService>();
+            var imported = exchange.ImportFromFile(dialog.FileName);
             IsDarkMode = imported.IsDarkMode;
             ApplyTheme(IsDarkMode);
 

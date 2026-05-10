@@ -19,9 +19,19 @@ namespace SecKey.App.Services
         public static string DataDirectory =>
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SecKey");
 
-        public string ConfigFilePath => Path.Combine(DataDirectory, "entra-config.json");
+        public string ConfigFilePath { get; }
 
         private EntraConfig? _cached;
+
+        public EntraConfigService()
+            : this(Path.Combine(DataDirectory, "entra-config.json"))
+        {
+        }
+
+        public EntraConfigService(string configFilePath)
+        {
+            ConfigFilePath = configFilePath;
+        }
 
         public EntraConfig Load()
         {
@@ -44,7 +54,10 @@ namespace SecKey.App.Services
         {
             try
             {
-                Directory.CreateDirectory(DataDirectory);
+                var parent = Path.GetDirectoryName(ConfigFilePath);
+                if (!string.IsNullOrWhiteSpace(parent))
+                    Directory.CreateDirectory(parent);
+
                 File.WriteAllText(ConfigFilePath,
                     JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true }));
                 _cached = config;

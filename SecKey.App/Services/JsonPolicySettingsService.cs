@@ -12,10 +12,22 @@ namespace SecKey.App.Services;
 
 public sealed class JsonPolicySettingsService
 {
-    private static readonly string SnapshotRoot = Path.Combine(
+    private static readonly string DefaultSnapshotRoot = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "SecKey",
         "JsonDefaultsSnapshot");
+
+    private readonly string _snapshotRoot;
+
+    public JsonPolicySettingsService()
+        : this(DefaultSnapshotRoot)
+    {
+    }
+
+    public JsonPolicySettingsService(string snapshotRoot)
+    {
+        _snapshotRoot = snapshotRoot;
+    }
 
     public IReadOnlyList<JsonPolicySettingItemViewModel> LoadAllSettings(string repoRoot)
     {
@@ -71,15 +83,15 @@ public sealed class JsonPolicySettingsService
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        if (Directory.Exists(SnapshotRoot))
-            Directory.Delete(SnapshotRoot, true);
-        Directory.CreateDirectory(SnapshotRoot);
+        if (Directory.Exists(_snapshotRoot))
+            Directory.Delete(_snapshotRoot, true);
+        Directory.CreateDirectory(_snapshotRoot);
 
         var copied = 0;
         foreach (var file in files)
         {
             var relative = Path.GetRelativePath(repoRoot, file);
-            var target = Path.Combine(SnapshotRoot, relative);
+            var target = Path.Combine(_snapshotRoot, relative);
             var parent = Path.GetDirectoryName(target);
             if (!string.IsNullOrWhiteSpace(parent))
                 Directory.CreateDirectory(parent);
@@ -93,17 +105,17 @@ public sealed class JsonPolicySettingsService
 
     public int ResetToSavedDefaults(string repoRoot)
     {
-        if (!Directory.Exists(SnapshotRoot))
+        if (!Directory.Exists(_snapshotRoot))
             return 0;
 
         var snapshotFiles = Directory
-            .EnumerateFiles(SnapshotRoot, "*.json", SearchOption.AllDirectories)
+            .EnumerateFiles(_snapshotRoot, "*.json", SearchOption.AllDirectories)
             .ToList();
 
         var restored = 0;
         foreach (var file in snapshotFiles)
         {
-            var relative = Path.GetRelativePath(SnapshotRoot, file);
+            var relative = Path.GetRelativePath(_snapshotRoot, file);
             var destination = Path.Combine(repoRoot, relative);
             var parent = Path.GetDirectoryName(destination);
             if (!string.IsNullOrWhiteSpace(parent))

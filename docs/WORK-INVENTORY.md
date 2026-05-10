@@ -72,12 +72,17 @@ Consolidate all active/uncommitted platform work into one deployable, documented
 ## Authoritative Open Items
 This section is the single release-readiness source of truth for remaining work.
 
-1. Complete runtime click-through validation for all security/intune module pages still marked PASS-STATIC or PENDING-RUNTIME in parity tracking.
-2. Implement non-placeholder Export Settings and Import Settings menu workflows.
-3. Add targeted smoke tests for newly added modules.
-4. Add integration tests for JSON live edit -> deploy pipeline.
-5. Address vulnerable/compatibility package warnings with a controlled upgrade plan.
-6. Expand module-level docs for each new security workflow.
+1. Complete manual runtime click-through validation for all security/intune module pages still marked PASS-STATIC.
+2. Expand smoke test coverage beyond settings workflow into module-specific service paths.
+3. Expand integration tests from local JSON workflow to tenant-integrated deploy pipeline in a non-production tenant.
+4. Execute package upgrade rings from the controlled plan and validate each ring.
+
+## Completed In This Pass
+- Implemented non-placeholder app settings Export/Import workflow wiring through a dedicated exchange service and included native deployment setting override round-trip.
+- Added automated smoke/integration tests for settings export/import and JSON live-edit baseline reset.
+- Added controlled package upgrade plan document.
+- Added consolidated module-level workflow documentation.
+- Added runtime validation matrix and manual sign-off checklist.
 
 ## Tracking Notes
 - Use this file for open/unfinished work status.

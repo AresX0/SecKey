@@ -3,4 +3,5 @@
   <Project Path="SecKey.Cli/SecKey.Cli.csproj" />
   <Project Path="SecKey.Core/SecKey.Core.csproj" />
   <Project Path="SecKey.Graph/SecKey.Graph.csproj" />
+  <Project Path="SecKey.Tests/SecKey.Tests.csproj" />
 </Solution>

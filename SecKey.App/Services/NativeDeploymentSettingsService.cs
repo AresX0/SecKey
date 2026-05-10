@@ -25,6 +25,8 @@ public interface INativeDeploymentSettingsService
 {
     IReadOnlyList<DeploymentSettingSnapshot> GetSettingsForScope(string scope);
     void SaveValue(string key, string value);
+    IReadOnlyDictionary<string, string> GetAllOverrides();
+    void ReplaceOverrides(IReadOnlyDictionary<string, string> overrides);
 }
 
 public sealed class NativeDeploymentSettingsService : INativeDeploymentSettingsService
@@ -101,6 +103,15 @@ public sealed class NativeDeploymentSettingsService : INativeDeploymentSettingsS
         _settingsPath = Path.Combine(dataDir, "deployment-settings.json");
     }
 
+    public NativeDeploymentSettingsService(string settingsPath)
+    {
+        var parent = Path.GetDirectoryName(settingsPath);
+        if (!string.IsNullOrWhiteSpace(parent))
+            Directory.CreateDirectory(parent);
+
+        _settingsPath = settingsPath;
+    }
+
     public IReadOnlyList<DeploymentSettingSnapshot> GetSettingsForScope(string scope)
     {
         EnsureLoaded();
@@ -141,6 +152,32 @@ public sealed class NativeDeploymentSettingsService : INativeDeploymentSettingsS
         }
 
         _overrides![key] = normalized;
+        Persist();
+    }
+
+    public IReadOnlyDictionary<string, string> GetAllOverrides()
+    {
+        EnsureLoaded();
+        return new Dictionary<string, string>(_overrides!, StringComparer.OrdinalIgnoreCase);
+    }
+
+    public void ReplaceOverrides(IReadOnlyDictionary<string, string> overrides)
+    {
+        EnsureLoaded();
+
+        _overrides!.Clear();
+        foreach (var kv in overrides)
+        {
+            if (string.IsNullOrWhiteSpace(kv.Key))
+                continue;
+
+            var val = (kv.Value ?? string.Empty).Trim();
+            if (val.Length == 0)
+                continue;
+
+            _overrides[kv.Key] = val;
+        }
+
         Persist();
     }
 
