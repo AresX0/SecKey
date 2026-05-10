@@ -7,12 +7,6 @@ public partial class LoginView : UserControl
 {
     public LoginView() => InitializeComponent();
 
-    private async void OnLoaded(object sender, System.Windows.RoutedEventArgs e)
-    {
-        if (DataContext is LoginViewModel vm)
-            await vm.AutoSignInInteractiveAsync();
-    }
-
     private void SecretBox_PasswordChanged(object sender, System.Windows.RoutedEventArgs e)
     {
         if (DataContext is LoginViewModel vm && sender is PasswordBox pb)

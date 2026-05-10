@@ -1,0 +1,87 @@
+<Window x:Class="SecKey.App.Views.SplashScreenWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SecKey"
+        Width="760"
+        Height="420"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Topmost="True"
+        Background="Transparent"
+        AllowsTransparency="True"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Segoe UI">
+    <Window.Resources>
+        <DropShadowEffect x:Key="GlowShadow" BlurRadius="32" ShadowDepth="0" Color="#1E3A8A" Opacity="0.35"/>
+    </Window.Resources>
+
+    <Border CornerRadius="26" Padding="1" Background="#0A1020" Effect="{StaticResource GlowShadow}">
+        <Border CornerRadius="25" Background="#0D1426">
+            <Grid>
+                <Grid.Background>
+                    <RadialGradientBrush Center="0.32,0.25" GradientOrigin="0.32,0.25" RadiusX="0.95" RadiusY="1.05">
+                        <GradientStop Color="#16203A" Offset="0"/>
+                        <GradientStop Color="#0D1426" Offset="0.55"/>
+                        <GradientStop Color="#07101D" Offset="1"/>
+                    </RadialGradientBrush>
+                </Grid.Background>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid Margin="28,26,28,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Grid.Column="0" Width="136" Height="136" HorizontalAlignment="Left" VerticalAlignment="Top"
+                            CornerRadius="30" Background="#121C33" BorderBrush="#223558" BorderThickness="1" Padding="18">
+                        <Image Source="/Assets/PlatypusToolsLogo.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    </Border>
+
+                    <Border Grid.Row="1" Grid.Column="0" Width="190" Height="190" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                            CornerRadius="28" Background="#101B32" BorderBrush="#223558" BorderThickness="1" ClipToBounds="True" Margin="0,18,0,0">
+                        <Grid>
+                            <MediaElement x:Name="CornerVideo"
+                                          LoadedBehavior="Manual"
+                                          UnloadedBehavior="Stop"
+                                          Stretch="UniformToFill"
+                                          MediaOpened="CornerVideo_MediaOpened"
+                                          MediaFailed="CornerVideo_MediaFailed"
+                                          MediaEnded="CornerVideo_MediaEnded"/>
+                            <Border Background="#0C1426" Opacity="0.36"/>
+                        </Grid>
+                    </Border>
+
+                    <StackPanel Grid.RowSpan="2" Grid.Column="1" Margin="24,12,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="SecKey" FontSize="40" FontWeight="SemiBold" Foreground="#F8FAFF"/>
+                        <TextBlock Text="Intune Configuration Manager" FontSize="18" Foreground="#A8BAD8" Margin="0,4,0,0"/>
+
+                        <Border Margin="0,20,0,0" Background="#101B32" CornerRadius="16" Padding="16">
+                            <StackPanel>
+                                <TextBlock Text="Starting up" Foreground="#DDE7F8" FontSize="13" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="StatusText" Text="Loading baseline content..." Foreground="#9EB0CF" Margin="0,8,0,0" TextWrapping="Wrap"/>
+                                <ProgressBar Margin="0,16,0,0" Height="6" IsIndeterminate="True" Foreground="#5EA1FF" Background="#1A2740"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+
+                <Border Grid.Row="1" Background="#090F1C" BorderBrush="#1C2B48" BorderThickness="1,1,1,0" CornerRadius="0,0,25,25" Padding="22,12">
+                    <DockPanel>
+                        <TextBlock Text="Baseline manifests, settings, and deployment tools are being prepared." Foreground="#7F94B7" DockPanel.Dock="Left"/>
+                        <TextBlock x:Name="VersionText" Text="" Foreground="#5F739B" HorizontalAlignment="Right"/>
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </Border>
+    </Border>
+</Window>

@@ -201,6 +201,14 @@ catch {
 
     private static Version GetCurrentVersion()
     {
+        var executablePath = Environment.ProcessPath ?? Assembly.GetEntryAssembly()?.Location;
+        if (!string.IsNullOrWhiteSpace(executablePath) && File.Exists(executablePath))
+        {
+            var fileVersion = FileVersionInfo.GetVersionInfo(executablePath).FileVersion;
+            if (Version.TryParse(fileVersion, out var parsedVersion))
+                return parsedVersion;
+        }
+
         var entry = Assembly.GetEntryAssembly();
         if (entry?.GetName().Version is { } v)
             return v;

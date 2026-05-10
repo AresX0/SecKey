@@ -11,6 +11,53 @@ $workspaceRoot = Split-Path -Parent $repoRoot
 $publishDir = Join-Path $repoRoot "artifacts\publish\SecKey.App"
 $outDir = Join-Path $repoRoot "artifacts\installer"
 $wixFile = Join-Path $PSScriptRoot "wix\SecKey.Product.wxs"
+$versionPropsPath = Join-Path $repoRoot "Directory.Build.props"
+
+function Get-ConfiguredVersion {
+    if (-not (Test-Path $versionPropsPath)) {
+        return "1.0.0.8"
+    }
+
+    $props = [xml](Get-Content $versionPropsPath -Raw)
+    $versionNode = $props.Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+    if ([string]::IsNullOrWhiteSpace($versionNode)) {
+        return "1.0.0.8"
+    }
+
+    return $versionNode.Trim()
+}
+
+function Set-ConfiguredVersion {
+    param([Parameter(Mandatory = $true)][string]$Version)
+
+    if (-not (Test-Path $versionPropsPath)) {
+        throw "Version file not found: $versionPropsPath"
+    }
+
+    $propsContent = Get-Content $versionPropsPath -Raw
+    foreach ($elementName in @('Version', 'FileVersion', 'AssemblyVersion', 'InformationalVersion')) {
+        $propsContent = $propsContent -replace "<$elementName>[^<]+</$elementName>", "<$elementName>$Version</$elementName>"
+    }
+
+    Set-Content -Path $versionPropsPath -Value $propsContent -NoNewline
+}
+
+function Increment-Version {
+    param([Parameter(Mandatory = $true)][string]$Version)
+
+    $parts = $Version.Trim().TrimStart('v', 'V').Split('.')
+    if ($parts.Count -lt 4) {
+        $parts = @($parts[0], $parts[1], $parts[2], '0')
+    }
+
+    $major = [int]$parts[0]
+    $minor = [int]$parts[1]
+    $build = [int]$parts[2]
+    $revision = [int]$parts[3]
+    $revision++
+
+    return "$major.$minor.$build.$revision"
+}
 
 function Resolve-ProductVersion {
     param([string]$Requested)
@@ -39,7 +86,7 @@ function Resolve-ProductVersion {
         }
     }
 
-    return "1.0.0"
+    return Get-ConfiguredVersion
 }
 
 function Resolve-HeadCommitTimeUtc {
@@ -56,9 +103,17 @@ function Resolve-HeadCommitTimeUtc {
     return (Get-Date).ToUniversalTime().AddYears(-1)
 }
 
-$resolvedProductVersion = Resolve-ProductVersion -Requested $ProductVersion
+$currentConfiguredVersion = Get-ConfiguredVersion
+if (-not [string]::IsNullOrWhiteSpace($ProductVersion)) {
+    $resolvedProductVersion = Resolve-ProductVersion -Requested $ProductVersion
+    Set-ConfiguredVersion -Version $resolvedProductVersion
+} else {
+    $resolvedProductVersion = Increment-Version -Version $currentConfiguredVersion
+    Set-ConfiguredVersion -Version $resolvedProductVersion
+}
 $headCommitUtc = Resolve-HeadCommitTimeUtc
 
+Write-Host "Current configured version: $currentConfiguredVersion" -ForegroundColor Gray
 Write-Host "Using MSI ProductVersion: $resolvedProductVersion" -ForegroundColor Cyan
 
 New-Item -ItemType Directory -Path $publishDir -Force | Out-Null

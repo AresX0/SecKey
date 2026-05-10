@@ -590,6 +590,13 @@ internal static class DeploymentPageHelpers
         if (Directory.Exists(Path.Combine(appBase, "JSON")))
             return appBase;
 
+        var fallbackRoot = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "SecKey",
+            "BaselineContent");
+        if (Directory.Exists(Path.Combine(fallbackRoot, "JSON")))
+            return fallbackRoot;
+
         return Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, ".."));
     }
 

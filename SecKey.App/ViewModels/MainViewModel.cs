@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using SecKey.App.Services;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -16,6 +17,7 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly IServiceProvider _sp;
     private readonly AuthState _auth;
     private readonly AppUpdateService _updateService;
+    private readonly Dictionary<Type, object> _viewCache = new();
     private bool _isUpdateCheckInProgress;
 
     [ObservableProperty] private object? _currentView;
@@ -36,48 +38,48 @@ public sealed partial class MainViewModel : ObservableObject
     }
 
     // Navigation Commands
-    [RelayCommand] private void ShowLogin() => CurrentView = _sp.GetRequiredService<LoginViewModel>();
-    [RelayCommand] private void ShowDashboard() => CurrentView = _sp.GetRequiredService<DashboardViewModel>();
-    [RelayCommand] private void ShowApps() => CurrentView = _sp.GetRequiredService<IntuneAppsViewModel>();
-    [RelayCommand] private void ShowUpload() => CurrentView = _sp.GetRequiredService<UploadAppViewModel>();
-    [RelayCommand] private void ShowPolicies() => CurrentView = _sp.GetRequiredService<PoliciesViewModel>();
-    [RelayCommand] private void ShowInfrastructure() => CurrentView = _sp.GetRequiredService<InfrastructureViewModel>();
-    [RelayCommand] private void ShowGroups() => CurrentView = _sp.GetRequiredService<GroupsViewModel>();
-    [RelayCommand] private void ShowCa() => CurrentView = _sp.GetRequiredService<ConditionalAccessViewModel>();
-    [RelayCommand] private void ShowDeviceTagging() => CurrentView = _sp.GetRequiredService<DeviceTaggingViewModel>();
+    [RelayCommand] private void ShowLogin() => CurrentView = GetOrCreateView<LoginViewModel>();
+    [RelayCommand] private void ShowDashboard() => CurrentView = GetOrCreateView<DashboardViewModel>();
+    [RelayCommand] private void ShowApps() => CurrentView = GetOrCreateView<IntuneAppsViewModel>();
+    [RelayCommand] private void ShowUpload() => CurrentView = GetOrCreateView<UploadAppViewModel>();
+    [RelayCommand] private void ShowPolicies() => CurrentView = GetOrCreateView<PoliciesViewModel>();
+    [RelayCommand] private void ShowInfrastructure() => CurrentView = GetOrCreateView<InfrastructureViewModel>();
+    [RelayCommand] private void ShowGroups() => CurrentView = GetOrCreateView<GroupsViewModel>();
+    [RelayCommand] private void ShowCa() => CurrentView = GetOrCreateView<ConditionalAccessViewModel>();
+    [RelayCommand] private void ShowDeviceTagging() => CurrentView = GetOrCreateView<DeviceTaggingViewModel>();
     
     // Security Analysis Commands
-    [RelayCommand] private void ShowSecurityAnalyzer() => CurrentView = _sp.GetRequiredService<SecurityAnalyzerViewModel>();
-    [RelayCommand] private void ShowSystemHardening() => CurrentView = _sp.GetRequiredService<SystemHardeningViewModel>();
-    [RelayCommand] private void ShowRebootAnalyzer() => CurrentView = _sp.GetRequiredService<RebootAnalyzerViewModel>();
-    [RelayCommand] private void ShowFileIntegrity() => CurrentView = _sp.GetRequiredService<FileIntegrityViewModel>();
-    [RelayCommand] private void ShowIntuneBackup() => CurrentView = _sp.GetRequiredService<IntuneBackupViewModel>();
-    [RelayCommand] private void ShowCertificateManager() => CurrentView = _sp.GetRequiredService<CertificateManagerViewModel>();
-    [RelayCommand] private void ShowSecureWipe() => CurrentView = _sp.GetRequiredService<SecureWipeViewModel>();
-    [RelayCommand] private void ShowNetworkTraffic() => CurrentView = _sp.GetRequiredService<NetworkTrafficViewModel>();
-    [RelayCommand] private void ShowHashScanner() => CurrentView = _sp.GetRequiredService<HashScannerViewModel>();
-    [RelayCommand] private void ShowCredentialManager() => CurrentView = _sp.GetRequiredService<CredentialManagerViewModel>();
-    [RelayCommand] private void ShowEncryptedClipboard() => CurrentView = _sp.GetRequiredService<EncryptedClipboardViewModel>();
-    [RelayCommand] private void ShowSshKeyManager() => CurrentView = _sp.GetRequiredService<SshKeyManagerViewModel>();
-    [RelayCommand] private void ShowFileEncryption() => CurrentView = _sp.GetRequiredService<FileEncryptionToolViewModel>();
-    [RelayCommand] private void ShowSecurityVault() => CurrentView = _sp.GetRequiredService<SecurityVaultViewModel>();
-    [RelayCommand] private void ShowYaraScanner() => CurrentView = _sp.GetRequiredService<YaraScannerViewModel>();
-    [RelayCommand] private void ShowCveSearch() => CurrentView = _sp.GetRequiredService<CveSearchViewModel>();
-    [RelayCommand] private void ShowForensicsAnalyzer() => CurrentView = _sp.GetRequiredService<ForensicsAnalyzerViewModel>();
-    [RelayCommand] private void ShowAdvancedForensics() => CurrentView = _sp.GetRequiredService<AdvancedForensicsViewModel>();
-    [RelayCommand] private void ShowGlobalSecureAccess() => CurrentView = _sp.GetRequiredService<GlobalSecureAccessViewModel>();
-    [RelayCommand] private void ShowWdacAppLocker() => CurrentView = _sp.GetRequiredService<WdacAppLockerViewModel>();
+    [RelayCommand] private void ShowSecurityAnalyzer() => CurrentView = GetOrCreateView<SecurityAnalyzerViewModel>();
+    [RelayCommand] private void ShowSystemHardening() => CurrentView = GetOrCreateView<SystemHardeningViewModel>();
+    [RelayCommand] private void ShowRebootAnalyzer() => CurrentView = GetOrCreateView<RebootAnalyzerViewModel>();
+    [RelayCommand] private void ShowFileIntegrity() => CurrentView = GetOrCreateView<FileIntegrityViewModel>();
+    [RelayCommand] private void ShowIntuneBackup() => CurrentView = GetOrCreateView<IntuneBackupViewModel>();
+    [RelayCommand] private void ShowCertificateManager() => CurrentView = GetOrCreateView<CertificateManagerViewModel>();
+    [RelayCommand] private void ShowSecureWipe() => CurrentView = GetOrCreateView<SecureWipeViewModel>();
+    [RelayCommand] private void ShowNetworkTraffic() => CurrentView = GetOrCreateView<NetworkTrafficViewModel>();
+    [RelayCommand] private void ShowHashScanner() => CurrentView = GetOrCreateView<HashScannerViewModel>();
+    [RelayCommand] private void ShowCredentialManager() => CurrentView = GetOrCreateView<CredentialManagerViewModel>();
+    [RelayCommand] private void ShowEncryptedClipboard() => CurrentView = GetOrCreateView<EncryptedClipboardViewModel>();
+    [RelayCommand] private void ShowSshKeyManager() => CurrentView = GetOrCreateView<SshKeyManagerViewModel>();
+    [RelayCommand] private void ShowFileEncryption() => CurrentView = GetOrCreateView<FileEncryptionToolViewModel>();
+    [RelayCommand] private void ShowSecurityVault() => CurrentView = GetOrCreateView<SecurityVaultViewModel>();
+    [RelayCommand] private void ShowYaraScanner() => CurrentView = GetOrCreateView<YaraScannerViewModel>();
+    [RelayCommand] private void ShowCveSearch() => CurrentView = GetOrCreateView<CveSearchViewModel>();
+    [RelayCommand] private void ShowForensicsAnalyzer() => CurrentView = GetOrCreateView<ForensicsAnalyzerViewModel>();
+    [RelayCommand] private void ShowAdvancedForensics() => CurrentView = GetOrCreateView<AdvancedForensicsViewModel>();
+    [RelayCommand] private void ShowGlobalSecureAccess() => CurrentView = GetOrCreateView<GlobalSecureAccessViewModel>();
+    [RelayCommand] private void ShowWdacAppLocker() => CurrentView = GetOrCreateView<WdacAppLockerViewModel>();
     [RelayCommand]
     private void ShowSystemAudit()
     {
         try
         {
-            CurrentView = _sp.GetRequiredService<SystemAuditViewModel>();
+            CurrentView = GetOrCreateView<SystemAuditViewModel>();
         }
         catch (Exception ex)
         {
             MessageBox.Show($"Failed to open System Audit: {ex.Message}", "SecKey", MessageBoxButton.OK, MessageBoxImage.Error);
-            CurrentView = _sp.GetRequiredService<LoginViewModel>();
+            CurrentView = GetOrCreateView<LoginViewModel>();
         }
     }
 
@@ -151,7 +153,7 @@ public sealed partial class MainViewModel : ObservableObject
         try
         {
             var currentType = CurrentView.GetType();
-            CurrentView = _sp.GetRequiredService(currentType);
+            CurrentView = GetOrCreateView(currentType);
         }
         catch
         {
@@ -222,6 +224,18 @@ public sealed partial class MainViewModel : ObservableObject
     {
         resources[key] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));
     }
+
+    private object GetOrCreateView(Type viewType)
+    {
+        if (_viewCache.TryGetValue(viewType, out var cached))
+            return cached;
+
+        var created = _sp.GetRequiredService(viewType);
+        _viewCache[viewType] = created;
+        return created;
+    }
+
+    private T GetOrCreateView<T>() where T : class => (T)GetOrCreateView(typeof(T));
 
     // Help Menu Commands
     [RelayCommand]
