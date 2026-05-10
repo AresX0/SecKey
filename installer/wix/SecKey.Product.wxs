@@ -1,12 +1,13 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Package Name="SecKey"
            Manufacturer="SecKey"
-           Version="1.0.0"
+           Version="$(var.ProductVersion)"
            UpgradeCode="D47AF9AE-A53E-4D3A-B5A4-CFD744790213"
            Language="1033"
            Scope="perUser">
 
-    <MajorUpgrade DowngradeErrorMessage="A newer version of SecKey is already installed." />
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+                  DowngradeErrorMessage="A newer version of SecKey is already installed." />
     <MediaTemplate EmbedCab="yes" />
 
     <StandardDirectory Id="LocalAppDataFolder">
@@ -17,8 +18,29 @@
       </Directory>
     </StandardDirectory>
 
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="APPPROGRAMMENUFOLDER" Name="SecKey" />
+    </StandardDirectory>
+
+    <DirectoryRef Id="APPPROGRAMMENUFOLDER">
+      <Component Id="StartMenuShortcut" Guid="*">
+        <Shortcut Id="SecKeyStartMenuShortcut"
+                  Name="SecKey"
+                  Target="[INSTALLFOLDER]SecKey.App.exe"
+                  WorkingDirectory="INSTALLFOLDER" />
+        <RemoveFolder Id="RemoveAppProgramMenuFolder" On="uninstall" />
+        <RegistryValue Root="HKCU"
+                       Key="Software\SecKey"
+                       Name="StartMenuShortcut"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
     <Feature Id="MainFeature" Title="SecKey" Level="1">
       <ComponentRef Id="MainExe" />
+      <ComponentRef Id="StartMenuShortcut" />
     </Feature>
 
   </Package>
